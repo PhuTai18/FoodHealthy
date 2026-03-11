@@ -1,0 +1,13 @@
+@model ITHealthy.DTOs.VerifyOtpDTO
+
+<h2>Verify OTP</h2>
+
+<form asp-action="VerifyOtp" method="post">
+
+    <input asp-for="Email" placeholder="Email" />
+
+    <input asp-for="Otp" placeholder="OTP Code" />
+
+    <button type="submit">Verify</button>
+
+</form>
