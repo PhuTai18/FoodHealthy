@@ -440,3 +440,4 @@ D:\FoodHealthy\FoodHealthy\bin\Debug\net9.0\package-lock.json
 D:\FoodHealthy\FoodHealthy\bin\Debug\net9.0\package.json
 D:\FoodHealthy\FoodHealthy\obj\Debug\net9.0\compressed\fsvlr2zkij-zfu6bvbgpx.gz
 D:\FoodHealthy\FoodHealthy\obj\Debug\net9.0\compressed\kq4jpmzgp8-7and8guzmx.gz
+D:\FoodHealthy\FoodHealthy\obj\Debug\net9.0\FoodHealthy.sourcelink.json

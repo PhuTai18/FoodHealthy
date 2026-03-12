@@ -1,0 +1,205 @@
+<aside id="sidebar" class="w-64 bg-white shadow-lg transition-all duration-300 flex flex-col h-screen">
+
+    <!-- Logo -->
+    <div class="border-b h-28 flex items-center justify-center cursor-pointer hover:bg-gray-100"
+         onclick="location.href='/Admin/Dashboard'">
+
+        <img src="~/images/HE.png" alt="ITHealthy Logo" class="object-contain">
+
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-2 py-4 space-y-2 overflow-y-auto">
+
+            <!-- Dashboard -->
+            <a href="/Admin/Dashboard"
+                   class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50">
+
+                📊 <span>Trang chủ</span>
+
+            </a>
+
+
+            <!-- Quản lý tài khoản -->
+            <div>
+
+                <div onclick="toggleMenu('accountMenu')"
+                     class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-orange-50">
+
+                    <div class="flex items-center gap-3">
+                        👥 <span>Quản lý tài khoản</span>
+                    </div>
+
+                    <span>▼</span>
+
+                </div>
+
+                <div id="accountMenu" class="hidden flex flex-col pl-8 mt-2 space-y-1">
+
+                    <a href="/Admin/Users" class="px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50">
+                        Người dùng
+                    </a>
+
+                    <a href="/Admin/Staffs" class="px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50">
+                        Nhân viên
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Cửa hàng -->
+            <a href="/Admin/Stores" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50">
+
+                🏪 <span>Quản lý Cửa hàng</span>
+
+            </a>
+
+
+            <!-- Đơn hàng -->
+            <div>
+
+                <div onclick="toggleMenu('orderMenu')"
+                     class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-orange-50">
+
+                    <div class="flex items-center gap-3">
+                        📋 <span>Quản lý đơn hàng</span>
+                    </div>
+
+                    <span>▼</span>
+
+                </div>
+
+                <div id="orderMenu" class="hidden flex flex-col pl-8 mt-2 space-y-1">
+
+                    <a href="/Admin/OrderShipping" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Đơn giao hàng
+                    </a>
+
+                    <a href="/Admin/OrderPickup" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Đơn nhận tại cửa hàng
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Doanh thu -->
+            <a href="/Admin/Revenue" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50">
+
+                💰 <span>Quản lý doanh thu</span>
+
+            </a>
+
+
+            <!-- Ưu đãi -->
+            <div>
+
+                <div onclick="toggleMenu('offerMenu')"
+                     class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-orange-50">
+
+                    <div class="flex items-center gap-3">
+                        🎁 <span>Ưu đãi</span>
+                    </div>
+
+                    <span>▼</span>
+
+                </div>
+
+                <div id="offerMenu" class="hidden flex flex-col pl-8 mt-2 space-y-1">
+
+                    <a href="/Admin/Vouchers" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Voucher
+                    </a>
+
+                    <a href="/Admin/Promotions" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Khuyến mãi
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Danh mục -->
+            <div>
+
+                <div onclick="toggleMenu('categoryMenu')"
+                     class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-orange-50">
+
+                    <div class="flex items-center gap-3">
+                        📦 <span>Danh mục</span>
+                    </div>
+
+                    <span>▼</span>
+
+                </div>
+
+                <div id="categoryMenu" class="hidden flex flex-col pl-8 mt-2 space-y-1">
+
+                    <a href="/Admin/Category" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Danh mục sản phẩm
+                    </a>
+
+                    <a href="/Admin/CategoryIng" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Danh mục nguyên liệu
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Kho -->
+            <div>
+
+                <div onclick="toggleMenu('warehouseMenu')"
+                     class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-orange-50">
+
+                    <div class="flex items-center gap-3">
+                        📦 <span>Sản phẩm</span>
+                    </div>
+
+                    <span>▼</span>
+
+                </div>
+
+                <div id="warehouseMenu" class="hidden flex flex-col pl-8 mt-2 space-y-1">
+
+                    <a href="/Admin/Products" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Sản phẩm
+                    </a>
+
+                    <a href="/Admin/Ingredients" class="px-3 py-2 rounded-lg hover:bg-orange-50">
+                        Nguyên liệu
+                    </a>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </aside>
+
+    <script>
+
+        function toggleMenu(menuId) {
+
+            let menu = document.getElementById(menuId);
+
+            if (menu.classList.contains("hidden")) {
+
+                menu.classList.remove("hidden");
+
+            } else {
+
+                menu.classList.add("hidden");
+
+            }
+
+        }
+
+    </script>

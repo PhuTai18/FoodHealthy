@@ -53,3 +53,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+builder.Services.AddSession();
+app.UseSession();
