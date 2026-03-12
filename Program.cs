@@ -29,6 +29,13 @@ builder.Services.AddDbContext<ITHealthyDbContext>(options =>
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
 
+
+
+//Cloudiary service
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.AddScoped<CloudinaryService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

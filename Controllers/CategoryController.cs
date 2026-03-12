@@ -1,15 +1,14 @@
 using ITHealthy.Data;
 using ITHealthy.DTOs;
 using ITHealthy.Models;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ITHealthy.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CategoryController : ControllerBase
+
+    public class CategoryController : Controller
     {
         private readonly ITHealthyDbContext _context;
 
@@ -18,10 +17,8 @@ namespace ITHealthy.Controllers
             _context = context;
         }
 
-
-        // 🔹 GET: http://localhost:5000/api/category/category_pro
-        [HttpGet("category_pro")]
-        public async Task<ActionResult<IEnumerable<CategoryProDTO>>> getCategoryPro()
+        // all Category Product
+        public async Task<ActionResult> AllCategoryPro()
         {
             var category_pro = await _context.Categories
                 .Select(p => new CategoryProDTO
@@ -32,14 +29,16 @@ namespace ITHealthy.Controllers
                     ImageCategories = p.ImageCategories
                 })
                 .ToListAsync();
-            return Ok(category_pro);
+
+            return View(category_pro);
         }
 
 
 
-        // 🔹 GET: http://localhost:5000/api/category/category_ing
-        [HttpGet("category_ing")]
-        public async Task<ActionResult<IEnumerable<CategoryIngDTO>>> getCategoryIng()
+
+        // all Category Ingredient
+
+        public async Task<ActionResult> AllCategoryIng()
         {
             var category_ing = await _context.CategoriesIngredients
                 .Select(p => new CategoryIngDTO
@@ -49,111 +48,182 @@ namespace ITHealthy.Controllers
                     DescriptionCat = p.DescriptionCat
                 })
                 .ToListAsync();
-            return Ok(category_ing);
+            return View(category_ing);
         }
 
-        [HttpGet("category_pro/{id}")]
+
+        // Get Details Category Product by Id
         public async Task<IActionResult> GetByIdCategoryPro(int id)
         {
             var catePro = await _context.Categories.FindAsync(id);
             if (catePro == null)
-                return NotFound(new { message = "Không tìm thấy loại sản phẩm." });
-
-            return Ok(catePro);
+            {
+                TempData["Error"] = "Không tìm thấy loại sản phẩm.";
+                return RedirectToAction("AllCategoryPro");
+            }
+            return View(catePro);
         }
 
-        [HttpGet("category_ing/{id}")]
+        // Get Details Category Ingredient by Id
         public async Task<IActionResult> GetByIdCategoryIng(int id)
         {
             var cateIng = await _context.CategoriesIngredients.FindAsync(id);
             if (cateIng == null)
-                return NotFound(new { message = "Không tìm thấy loại nguyên liệu." });
-
-            return Ok(cateIng);
+            {
+                TempData["Error"] = "Không tìm thấy loại nguyên liệu.";
+                return RedirectToAction("AllCategoryIng");
+            }
+            return View(cateIng);
         }
 
-        [HttpPost("category_pro")]
-        public async Task<IActionResult> CreateCatePro([FromBody] Category catePro)
+        // CREATE Category Product
+        public IActionResult CreateCategoryPro()
         {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateCatePro(Category catePro)
+        {
+            if (!ModelState.IsValid)
+                return View(catePro);
 
             _context.Categories.Add(catePro);
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                message = "Tạo loại sản phẩm thành công!",
-                data = catePro
-            });
+            TempData["Success"] = "Tạo loại sản phẩm thành công";
+            return RedirectToAction("AllCategoryPro");
         }
 
-        [HttpPost("category_ing")]
-        public async Task<IActionResult> CreateCateIng([FromBody] CategoriesIngredient cateIng)
+        [HttpPost]
+        public async Task<IActionResult> CreateCateIng(CategoriesIngredient cateIng)
         {
+            if (!ModelState.IsValid)
+                return View(cateIng);
 
             _context.CategoriesIngredients.Add(cateIng);
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                message = "Tạo loại nguyên liệu thành công!",
-                data = cateIng
-            });
+            TempData["Success"] = "Tạo loại nguyên liệu thành công";
+            return RedirectToAction("AllCategoryIng");
         }
 
-        [HttpPut("category_pro/{id}")]
-        public async Task<IActionResult> UpdateCatePro(int id, [FromBody] Category catePro)
+        // UPDATE Category Product
+        public IActionResult UpdateCategoryPro(int id)
+        {
+            var catePro = _context.Categories.Find(id);
+            if (catePro == null)
+            {
+                TempData["Error"] = "Không tìm thấy loại sản phẩm.";
+                return RedirectToAction("AllCategoryPro");
+            }
+            return View(catePro);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCatePro(int id, Category catePro)
         {
             var categoryPro = await _context.Categories.FindAsync(id);
             if (categoryPro == null)
-                return NotFound(new { message = "Không tìm thấy loại sản phẩm." });
+            {
+                TempData["Error"] = "Không tìm thấy loại sản phẩm.";
+                return RedirectToAction("AllCategoryPro");
+            }
 
             categoryPro.CategoryName = catePro.CategoryName;
             categoryPro.DescriptionCat = catePro.DescriptionCat;
 
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật loại sản phẩm thành công!";
+            return RedirectToAction("AllCategoryPro");
 
-            return Ok(new { message = "Cập nhật loại sản phẩm thành công!", categoryPro });
+        }
+        // UPDATE Category Ingredient
+        public async Task<IActionResult> UpdateCategoryIng(int id)
+        {
+            var cateIng = _context.CategoriesIngredients.Find(id);
+            if (cateIng == null)
+            {
+                TempData["Error"] = "Không tìm thấy loại nguyên liệu.";
+                return RedirectToAction("AllCategoryIng");
+            }
+            return View(cateIng);
         }
 
-        [HttpPut("category_ing/{id}")]
-        public async Task<IActionResult> UpdateCateIng(int id, [FromBody] CategoriesIngredient cateIng)
+        [HttpPost]
+        public async Task<IActionResult> UpdateCateIng(int id, CategoriesIngredient cateIng)
         {
             var categoryIng = await _context.CategoriesIngredients.FindAsync(id);
             if (categoryIng == null)
-                return NotFound(new { message = "Không tìm thấy loại nguyên liệu." });
+            {
+                TempData["Error"] = "Không tìm thấy loại nguyên liệu.";
+                return RedirectToAction("AllCategoryIng");
+            }
 
             categoryIng.CategoryName = cateIng.CategoryName;
             categoryIng.DescriptionCat = cateIng.DescriptionCat;
 
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật loại nguyên liệu thành công!";
+            return RedirectToAction("AllCategoryIng");
 
-            return Ok(new { message = "Cập nhật loại nguyên liệu thành công!", categoryIng });
         }
 
-        [HttpDelete("category_pro/{id}")]
+
+        // DELETE Category Product
+        public async Task<IActionResult> DeleteCategoryPro(int id)
+        {
+            var catePro = _context.Categories.Find(id);
+            if (catePro == null)
+            {
+                TempData["Error"] = "Không tìm thấy loại sản phẩm.";
+                return RedirectToAction("AllCategoryPro");
+            }
+            return View(catePro);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> DeleteCatePro(int id)
         {
             var catePro = await _context.Categories.FindAsync(id);
             if (catePro == null)
-                return NotFound(new { message = "Không tìm thấy loại sản phẩm." });
-
+            {
+                TempData["Error"] = "Không tìm thấy loại sản phẩm.";
+                return RedirectToAction("AllCategoryPro");
+            }
             _context.Categories.Remove(catePro);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Đã xóa loại sản phẩm thành công!" });
+            TempData["Success"] = "Đã xóa loại sản phẩm thành công!";
+            return RedirectToAction("AllCategoryPro");
         }
 
-        [HttpDelete("category_ing/{id}")]
+        // DELETE Category Ingredient
+        public async Task<IActionResult> DeleteCategoryIng(int id)
+        {
+            var cateIng = _context.CategoriesIngredients.Find(id);
+            if (cateIng == null)
+            {
+                TempData["Error"] = "Không tìm thấy loại nguyên liệu.";
+                return RedirectToAction("AllCategoryIng");
+            }
+            return View(cateIng);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> DeleteCateIng(int id)
         {
             var cateIng = await _context.CategoriesIngredients.FindAsync(id);
             if (cateIng == null)
-                return NotFound(new { message = "Không tìm thấy loại nguyên liệu." });
+            {
+                TempData["Error"] = "Không tìm thấy loại nguyên liệu.";
+                return RedirectToAction("AllCategoryIng");
+            }
 
             _context.CategoriesIngredients.Remove(cateIng);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Đã xóa loại nguyên liệu thành công!" });
+            TempData["Success"] = "Đã xóa loại nguyên liệu thành công!";
+            return RedirectToAction("AllCategoryIng");
         }
     }
 }
