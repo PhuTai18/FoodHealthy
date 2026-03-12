@@ -7,9 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ITHealthy.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductsController : Controller
     {
         private readonly ITHealthyDbContext _context;
         private readonly CloudinaryService _cloudinaryService;
@@ -20,12 +18,27 @@ namespace ITHealthy.Controllers
             _cloudinaryService = cloudinaryService;
         }
 
-        // 🔹 GET: http://localhost:5000/api/products/all-products
-        [HttpGet("all-products")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
+        // 🔹 GET All Product 
+        public async Task<ActionResult> AllProducts(int? categoryId)
         {
-            var products = await _context.Products
+            // Lấy danh sách category
+            var categories = await _context.Categories.ToListAsync();
+            ViewBag.Categories = categories;
+
+            // Query sản phẩm
+            var query = _context.Products
                 .Include(p => p.Category)
+                .AsQueryable();
+
+            // Filter category
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            // Lấy danh sách product từ query
+            var products = await query
+                        .Include(p => p.Category)
                 .Select(p => new ProductDTO
                 {
                     ProductId = p.ProductId,
@@ -43,12 +56,12 @@ namespace ITHealthy.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(products);
+            return View(products);
         }
 
-        // 🔹 GET: http://localhost:5000/api/products/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDTO>> GetProductById(int id)
+        // 🔹 GET Detail Product 
+
+        public async Task<ActionResult> GetProductById(int id)
         {
             var product = await _context.Products
                 .Include(p => p.Category)
@@ -71,111 +84,169 @@ namespace ITHealthy.Controllers
                 .FirstOrDefaultAsync();
 
             if (product == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm" });
-
-            return Ok(product);
-        }
-
-        //POST: http://localhost:5000/api/products/add
-
-        [HttpPost("add")]
-        public async Task<IActionResult> AddProduct([FromForm] ProductDTO request)
-        {
-            if (string.IsNullOrEmpty(request.ProductName))
-                return BadRequest(new { message = "Tên sản phẩm không được để trống." });
-
-            string? imageUrl = null;
-
-            if (request.ImageFile != null && request.ImageFile.Length > 0)
             {
-                // ✅ Upload lên Cloudinary, lưu ảnh vào folder products_images
-                imageUrl = await _cloudinaryService.UploadImageAsync(request.ImageFile);
+                TempData["Error"] = "Không tìm thấy sản phẩm";
+                return RedirectToAction("AllProducts");
             }
+            return View(product);
+        }
 
-            var product = new Product
+        // CREATE Product
+
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct(ProductDTO request)
+        {
+            if (!ModelState.IsValid)
             {
-                ProductName = request.ProductName,
-                DescriptionProduct = request.DescriptionProduct,
-                BasePrice = request.BasePrice,
-                Calories = request.Calories,
-                Protein = request.Protein,
-                Carbs = request.Carbs,
-                Fat = request.Fat,
-                ImageProduct = imageUrl,
-                CategoryId = request.CategoryId,
-                IsAvailable = request.IsAvailable ?? true,
-                CreatedAt = DateTime.Now
-            };
-
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+                TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
+                return View(request);
+            }
+            try
             {
-                message = "Thêm sản phẩm thành công!",
-                data = new
+                string? imageUrl = null;
+
+                if (request.ImageFile != null && request.ImageFile.Length > 0)
                 {
-                    product.ProductId,
-                    product.ProductName,
-                    product.BasePrice,
-                    product.ImageProduct
+                    // ✅ Upload lên Cloudinary, lưu ảnh vào folder products_images
+                    imageUrl = await _cloudinaryService.UploadImageAsync(request.ImageFile);
                 }
-            });
+
+                var product = new Product
+                {
+                    ProductName = request.ProductName,
+                    DescriptionProduct = request.DescriptionProduct,
+                    BasePrice = request.BasePrice,
+                    Calories = request.Calories,
+                    Protein = request.Protein,
+                    Carbs = request.Carbs,
+                    Fat = request.Fat,
+                    ImageProduct = imageUrl,
+                    CategoryId = request.CategoryId,
+                    IsAvailable = request.IsAvailable ?? true,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("AllProducts");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi thêm sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
         }
 
 
-        //PUT: http://localhost:5000/api/products/update/{id}
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDTO request)
+        // EDIT Product
+        public async Task<IActionResult> UpdateProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm!" });
-
-            if (request.ImageFile != null && request.ImageFile.Length > 0)
             {
-                // ✅ Upload ảnh mới lên Cloudinary
-                var imageUrl = await _cloudinaryService.UploadImageProductAsync(request.ImageFile);
-                product.ImageProduct = imageUrl;
+                TempData["Error"] = "Không tìm thấy sản phẩm.";
+                return RedirectToAction("AllProducts");
             }
-
-            // Cập nhật thông tin
-            product.ProductName = request.ProductName;
-            product.DescriptionProduct = request.DescriptionProduct;
-            product.BasePrice = request.BasePrice;
-            product.Calories = request.Calories;
-            product.Protein = request.Protein;
-            product.Carbs = request.Carbs;
-            product.Fat = request.Fat;
-            product.CategoryId = request.CategoryId;
-            product.IsAvailable = request.IsAvailable;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            var productDto = new ProductDTO
             {
-                message = "Cập nhật sản phẩm thành công!",
-                data = new
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                DescriptionProduct = product.DescriptionProduct,
+                BasePrice = product.BasePrice,
+                Calories = product.Calories,
+                Protein = product.Protein,
+                Carbs = product.Carbs,
+                Fat = product.Fat,
+                ImageProduct = product.ImageProduct,
+                CategoryId = product.CategoryId,
+                IsAvailable = product.IsAvailable
+            };
+            return View(productDto);
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateProduct(int id, ProductDTO request)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
+            try
+            {
+
+                if (request.ImageFile != null && request.ImageFile.Length > 0)
                 {
-                    product.ProductId,
-                    product.ProductName,
-                    product.ImageProduct
+                    // ✅ Upload ảnh mới lên Cloudinary
+                    var imageUrl = await _cloudinaryService.UploadImageProductAsync(request.ImageFile);
+                    product.ImageProduct = imageUrl;
                 }
-            });
+
+                // Cập nhật thông tin
+                product.ProductName = request.ProductName;
+                product.DescriptionProduct = request.DescriptionProduct;
+                product.BasePrice = request.BasePrice;
+                product.Calories = request.Calories;
+                product.Protein = request.Protein;
+                product.Carbs = request.Carbs;
+                product.Fat = request.Fat;
+                product.CategoryId = request.CategoryId;
+                product.IsAvailable = request.IsAvailable;
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Cập nhật sản phẩm thành công.";
+                return RedirectToAction("AllProducts");
+
+
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
         }
 
-        //DELETE: http://localhost:5000/api/products/delete/{id}
-        [HttpDelete("delete/{id}")]
+        //DELETE Product
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
+            return View(product);
+        }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Không tìm thấy sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
+            try
+            {
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Xóa sản phẩm thành công.";
+                return RedirectToAction("AllProducts");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi xóa sản phẩm.";
+                return RedirectToAction("AllProducts");
+            }
 
-            return Ok(new { message = "Xóa sản phẩm thành công." });
         }
 
 
