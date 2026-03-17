@@ -1,0 +1,217 @@
+﻿@model List<ITHealthy.DTOs.ProductDTO>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-hp">
+
+    <!-- 🔥 HERO -->
+    <div class="video-container">
+        <video autoplay loop muted playsinline class="back-vid">
+            <source src="@Url.Content("~/videos/video1_homepage.mp4")" type="video/mp4" />
+        </video>
+
+        <div class="video-overlay"></div>
+
+        <div class="content1-homepage">
+            <h1 class="homepage-title">Nâng niu sức khỏe của bạn</h1>
+            <p class="text-white text-lg mt-4">Ăn lành – sống khỏe mỗi ngày</p>
+
+            <a href="/products" class="hero-btn">
+                Khám phá ngay
+            </a>
+        </div>
+    </div>
+
+    <!-- 🔥 SECTION 2: SOULMATE -->
+    <section class="container-content2-hp fade-in relative overflow-hidden bg-[#3E0D1C] py-32">
+        <img src="/svg/1.svg" class="svg-left svg-1 anim-left opacity-20" />
+        <img src="/svg/4.svg" class="svg-left svg-2 anim-left delay-200 opacity-20" />
+        <img src="/svg/5.svg" class="svg-right svg-3 anim-right opacity-20" />
+        <img src="/svg/7.svg" class="svg-right svg-4 anim-right delay-200 opacity-20" />
+
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+
+        <div class="content2-inner text-center relative z-10 max-w-3xl mx-auto px-4">
+            <h1 class="text-white text-4xl md:text-5xl font-bold mb-6">
+                Your healthy food <br /> soulmate
+            </h1>
+
+            <p class="text-[#f3dede]">
+                IT Healthy mong trở thành một tri kỷ...
+            </p>
+        </div>
+    </section>
+
+    <!-- 🔥 SECTION 3: BUILD MEAL (4 bước) -->
+    <section class="px-6 md:px-10 mt-20 fade-in">
+        <div class="text-center mb-10">
+            <p class="text-sm text-gray-500">SÁNG TẠO THỎA THÍCH VỚI MENU</p>
+            <h2 class="text-3xl font-bold text-[#3E0D1C]">
+                Xây dựng thực đơn lành mạnh
+            </h2>
+            <p class="text-gray-500 mt-2">
+                KIỂM SOÁT CALO - GIỮ DÁNG - KHỎE MẠNH
+            </p>
+        </div>
+
+        @await Html.PartialAsync("_ImageCardGallery")
+
+        <div class="text-center mt-6">
+            <a href="/calories" class="go-calories-btn">
+                Tính calo ngay
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 SECTION 4: PRODUCT CAROUSEL -->
+    <section class="container-content4-hp fade-in mt-20">
+        <!-- 🔥 TITLE -->
+        <div class="content3-inner text-center mb-8">
+            <p>HOẶC CHỌN SẴN TRONG MENU</p>
+            <h2 class="text-3xl font-bold text-[#3E0D1C]">
+                Sou-made bowls
+            </h2>
+        </div>
+
+        <!-- 🔥 CAROUSEL -->
+        <div class="product-scroll-wrapper mb-10">
+            @await Html.PartialAsync("_ProductCarousel", Model)
+        </div>
+
+        <!-- 🔥 BUTTON -->
+        <div class="text-center mt-6">
+            <a href="/products"
+            class="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600">
+                Xem thêm
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 SECTION 5: TEXT + IMAGE -->
+    <section class="fade-in mt-20">
+        @await Html.PartialAsync("_TextImageCarousel")
+    </section>
+
+    <!-- 🔥 SECTION 6: MISSION -->
+    <section class="container-content6-hp fade-in mt-20">
+        <div class="content6-inner text-center">
+
+            <p class="text-sm text-gray-500">SỨ MỆNH CỦA CHÚNG TÔI</p>
+            
+
+            <h2 class="text-3xl font-bold text-[#3E0D1C]">
+                Cùng bạn, nuôi dưỡng mối quan hệ lành mạnh với thực phẩm
+            </h2>
+
+            <p class="text-sm text-gray-500">IT Healthy mong muốn đồng hành cùng bạn...</p>
+
+            <div class="image-container6-hp mt-6">
+                <img src="https://soumaki.com.vn/wp-content/uploads/2024/05/Pic-Web_Our-Story-1024x614.webp"
+                     class="rounded-2xl shadow-lg mx-auto" />
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    const slider = document.getElementById("mealCarousel");
+
+    // 🔥 BUTTON SCROLL
+    function scrollCarousel(direction) {
+        const card = slider.querySelector("div");
+        const scrollAmount = card.offsetWidth + 24;
+
+        slider.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+
+    // 🔥 DRAG SCROLL (chuột)
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    slider.addEventListener("mousedown", (e) => {
+        isDown = true;
+        slider.classList.add("cursor-grabbing");
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener("mouseleave", () => {
+        isDown = false;
+        slider.classList.remove("cursor-grabbing");
+    });
+
+    slider.addEventListener("mouseup", () => {
+        isDown = false;
+        slider.classList.remove("cursor-grabbing");
+    });
+
+    slider.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        slider.scrollLeft = scrollLeft - walk;
+    });
+</script>
+
+@section Scripts {
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // 🔥 Fade-in
+    const elements = document.querySelectorAll(".fade-in");
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+            }
+        });
+    });
+
+    elements.forEach(el => observer.observe(el));
+
+    // 🔥 Swiper (check tồn tại)
+    if (document.querySelector(".mySwiper")) {
+        new Swiper(".mySwiper", {
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                type: "fraction",
+                formatFractionCurrent: n => String(n).padStart(2, '0'),
+                formatFractionTotal: n => String(n).padStart(2, '0'),
+            },
+        });
+    }
+});
+
+// 🔥 Navigate
+function goToDetail(id) {
+    window.location.href = "/product/" + id;
+}
+
+// 🔥 Download button (fix click lan)
+function downloadRecipe(e, name) {
+    e.stopPropagation();
+    alert("Tải công thức cho " + name);
+}
+</script>
+
+
+}

@@ -1,0 +1,186 @@
+.main-hp {
+  background-color: #F5EDD8;
+}
+
+.video-container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.back-vid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content1-homepage {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  top: 40%;
+}
+
+.homepage-title {
+  color: white;
+  font-size: 80px;
+  font-weight: bold;
+}
+
+.content1-homepage a {
+  padding: 10px 25px;
+  background: rgba(167,151,8,0.5);
+  border-radius: 20px;
+  color: white;
+}
+
+.container-content2-hp {
+  background: #4C082A;
+  color: white;
+  padding: 100px;
+  text-align: center;
+}
+
+.container-content3-hp,
+.container-content4-hp,
+.container-content6-hp {
+  margin: 80px 100px;
+  text-align: center;
+}
+
+.go-calories-btn {
+  background: #00b389;
+  padding: 12px 30px;
+  border-radius: 30px;
+  color: white;
+}
+
+/* overlay video */
+.video-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* content nổi lên */
+.content1-homepage {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  top: 40%;
+}
+
+/* nút hero */
+.hero-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 30px;
+  background: #00b389;
+  color: white;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.hero-btn:hover {
+  background: #009b77;
+  transform: translateY(-3px);
+}
+
+/* animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== SECTION 2 ===== */
+.container-content2-hp {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== SVG BASE ===== */
+.svg-left,
+.svg-right {
+    position: absolute;
+    width: 90px;
+    opacity: 0.25;
+    z-index: 1;
+    pointer-events: none;
+
+    /* animation base */
+    transition: all 0.8s ease;
+}
+
+/* ===== POSITION TỪNG SVG ===== */
+
+/* LEFT */
+.svg-1 {
+    top: 15%;
+    left: 5%;
+}
+
+.svg-2 {
+    bottom: 15%;
+    left: 10%;
+}
+
+/* RIGHT */
+.svg-3 {
+    top: 20%;
+    right: 5%;
+}
+
+.svg-4 {
+    bottom: 15%;
+    right: 10%;
+}
+
+/* ===== ANIMATION (ban đầu ẩn) ===== */
+.anim-left {
+    transform: translateX(100px);
+    opacity: 0;
+}
+
+.anim-right {
+    transform: translateX(-100px);
+    opacity: 0;
+}
+
+/* ===== KHI SCROLL TỚI ===== */
+.show .anim-left {
+    transform: translateX(0);
+    opacity: 0.25;
+}
+
+.show .anim-right {
+    transform: translateX(0);
+    opacity: 0.25;
+}
+
+/* ===== DELAY ===== */
+.delay-200 {
+    transition-delay: 0.2s;
+}
+
+/* ===== CONTENT luôn nằm trên ===== */
+.content2-inner {
+    position: relative;
+    z-index: 10;
+}
+

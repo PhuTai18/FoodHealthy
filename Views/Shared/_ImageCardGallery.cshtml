@@ -1,0 +1,22 @@
+@{
+    var images = new[]
+    {
+        new { Src = Url.Content("~/images/pic1.webp"), Title = "Bước 1", Text = "Đạm" },
+        new { Src = Url.Content("~/images/pic2.webp"), Title = "Bước 2", Text = "Thực vật" },
+        new { Src = Url.Content("~/images/pic3.webp"), Title = "Bước 3", Text = "Ăn kèm" },
+        new { Src = Url.Content("~/images/pic4.webp"), Title = "Bước 4", Text = "Xốt" }
+    };
+}
+
+<div class="image-card-gallery">
+    @foreach (var item in images)
+    {
+        <div  class="image-card">
+            <img src="@item.Src" class="card-img" />
+            <div class="card-overlay">
+                <h3>@item.Title</h3>
+                <p>@item.Text</p>
+            </div>
+        </div>
+    }
+</div>

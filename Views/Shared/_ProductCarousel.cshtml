@@ -1,0 +1,121 @@
+@model List<ITHealthy.DTOs.ProductDTO>
+
+<div class="relative px-6">
+
+    <!-- 🔥 LEFT -->
+    <button onclick="scrollCarousel('left')" class="group absolute left-2 top-1/2 -translate-y-1/2 z-10
+        w-12 h-12 flex items-center justify-center
+        rounded-full backdrop-blur-md bg-white/70
+        shadow-lg border border-white/40
+        hover:bg-white hover:scale-110 active:scale-95
+        transition-all duration-300">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-6 h-6 text-[#3E0D1C] group-hover:-translate-x-1 transition-all duration-300" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <!-- 🔥 CAROUSEL -->
+    <div id="mealCarousel" class="flex gap-6 overflow-x-auto px-12 scrollbar-hide cursor-grab">
+
+        @foreach (var meal in Model)
+        {
+            <div class="group relative flex flex-col items-center 
+                bg-[#fff8f0] rounded-3xl p-5 shadow-md hover:shadow-xl 
+                transition-all duration-300
+                w-[320px] min-w-[320px] max-w-[320px] flex-shrink-0">
+
+                <!-- ❤️ FAVORITE -->
+                <div class="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-full"
+                     style="background-color:#ff623e;color:#f5edd8;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+                        2 6 3.5 4 5.5 4c1.54 0 3.04.99 3.57 2.36h1.87C13.46 4.99 
+                        14.96 4 16.5 4 18.5 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 
+                        11.54L12 21.35z" />
+                    </svg>
+                </div>
+
+                <!-- IMAGE -->
+                <div class="w-full flex justify-center mb-4">
+                    <img src="@meal.ImageProduct" class="w-48 h-48 object-contain rounded-full bg-white p-4 
+                    transition duration-500 group-hover:-translate-y-3 group-hover:scale-110" />
+                </div>
+
+                <!-- NAME + CALORIES -->
+                <div class="flex justify-between items-center w-full mb-2">
+                    <h3 class="text-xl font-bold text-[#3E0D1C] line-clamp-1">
+                        @meal.ProductName
+                    </h3>
+
+                    <span class="text-sm font-semibold text-[#3E0D1C] whitespace-nowrap">
+                        @meal.Calories kcal
+                    </span>
+                </div>
+
+                <!-- DESC -->
+                <p class="text-gray-700 text-sm mb-3 text-center 
+                    h-12 line-clamp-2 overflow-hidden 
+                    break-words leading-snug">
+                    @meal.CategoryName: @meal.DescriptionProduct
+                </p>
+
+                <!-- LINE -->
+                <div class="w-full h-[2px] mb-2 border-dotted border-b border-gray-300"></div>
+
+                <!-- NUTRITION -->
+                <div class="flex justify-around w-full text-[#3E0D1C] font-semibold mb-4">
+                    <div class="text-center">
+                        <div>@(meal.Protein ?? 0)</div>
+                        <small class="text-gray-500">PROTEIN</small>
+                    </div>
+
+                    <div class="text-center">
+                        <div>@(meal.Carbs ?? 0)</div>
+                        <small class="text-gray-500">CARBS</small>
+                    </div>
+
+                    <div class="text-center">
+                        <div>@(meal.Fat ?? 0)</div>
+                        <small class="text-gray-500">FAT</small>
+                    </div>
+                </div>
+
+                <!-- PRICE -->
+                <div class="flex items-center justify-between w-full mt-auto">
+                    <span class="text-lg font-bold text-[#ff623e]">
+                        @((meal.BasePrice ?? 0).ToString("N0")) đ
+                    </span>
+
+                    <button onclick="addToCart(@meal.ProductId, @meal.BasePrice)"               class="w-10 h-10 flex items-center justify-center 
+                        bg-[#ff623e] text-white rounded-full shadow
+                        hover:scale-110 hover:bg-[#e55734] transition">
+                        +
+                    </button>
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- 🔥 RIGHT -->
+    <button onclick="scrollCarousel('right')" class="group absolute right-2 top-1/2 -translate-y-1/2 z-10
+        w-12 h-12 flex items-center justify-center
+        rounded-full backdrop-blur-md bg-white/70
+        shadow-lg border border-white/40
+        hover:bg-white hover:scale-110 active:scale-95
+        transition-all duration-300">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-6 h-6 text-[#3E0D1C] group-hover:translate-x-1 transition-all duration-300" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
+
+
+
+</div>

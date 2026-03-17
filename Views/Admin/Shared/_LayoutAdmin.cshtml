@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
 
-    <meta charset="utf-8" />
-    <title>ITHealthy Admin</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<title>ITHealthy Admin</title>
+
+<base href="/" />
+
+<script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
@@ -19,7 +22,6 @@
         @await Component.InvokeAsync("AdminSidebar")
     </div>
 
-    <!-- Right Side -->
     <div class="flex flex-col flex-1 h-full">
 
         <!-- Header -->
@@ -29,15 +31,12 @@
 
         <!-- Content -->
         <main class="flex-1 p-6 overflow-y-auto">
-
             @RenderBody()
-
         </main>
 
     </div>
 
 </div>
-
 
 <script>
 
@@ -45,19 +44,16 @@ function toggleMenu(menuId) {
 
     let menu = document.getElementById(menuId);
 
-    if(menu.classList.contains("hidden")){
-
-        menu.classList.remove("hidden");
-
-    }else{
-
-        menu.classList.add("hidden");
-
+    if(menu){
+        menu.classList.toggle("hidden");
     }
 
 }
 
 </script>
+
+<!-- Blazor -->
+<script src="/_framework/blazor.server.js"></script>
 
 </body>
 </html>

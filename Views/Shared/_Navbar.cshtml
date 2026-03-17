@@ -1,0 +1,91 @@
+@{
+    var path = Context.Request.Path.Value?.ToLower();
+    bool isHome = path == "/";
+    bool isOurBowls = path.StartsWith("/signature-bowls")
+                   || path.StartsWith("/createyourbowl")
+                   || path.StartsWith("/userbowlpage");
+}
+
+<div id="navbar" class="navbar-wrapper @(isHome ? "navbar-transparent" : "")">
+
+    <div class="navbar-main">
+
+        <!-- LOGO -->
+        <a href="/" class="navbar-logo">
+            <img src="~/images/logo.png" class="logo-ithealthy" />
+        </a>
+
+        <!-- MENU -->
+        <nav class="navbar-nav">
+            <ul class="nav-menu">
+
+                <li class="nav-item @(path.StartsWith("/calories") ? "active" : "")">
+                    <a href="/calories">Calories calculator</a>
+                </li>
+
+                <li class="nav-item @(isOurBowls ? "active" : "")">
+                    <a href="#" onclick="toggleSubmenu()">Our bowls</a>
+                </li>
+
+                <li class="nav-item @(path.StartsWith("/aboutus") ? "active" : "")">
+                    <a href="/aboutus">About us</a>
+                </li>
+
+                <li class="nav-item @(path.StartsWith("/stores") ? "active" : "")">
+                    <a href="/stores">Stores</a>
+                </li>
+
+                <li class="nav-item @(path.StartsWith("/blogs") ? "active" : "")">
+                    <a href="/blogs">Blogs</a>
+                </li>
+
+                <!-- LANG -->
+                <li class="lang-item">
+                    <a href="#">
+                        <span class="lang-code">VI</span>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+        <!-- RIGHT -->
+        <div class="navbar-auth">
+
+            <!-- CART -->
+            <a href="/carts" class="cart-btn">🛒</a>
+
+            <!-- USER -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="user-menu-wrapper">
+                    <img src="/img/default-avatar.png" class="user-avatar" onclick="toggleUserMenu()" />
+
+                    <div id="userDropdown" class="user-dropdown hidden">
+                        <p class="user-name">User</p>
+
+                        <a href="/profile" class="dropdown-item">Thông tin</a>
+                        <a href="/orders" class="dropdown-item">Đơn hàng</a>
+                        <a href="/logout" class="dropdown-item">Đăng xuất</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <a href="/auth/login" class="auth-btn">👤</a>
+            }
+
+        </div>
+    </div>
+
+    <!-- SUBMENU -->
+    <div id="submenu" class="submenu-container @(isOurBowls ? "" : "submenu-disabled")">
+
+        <ul class="submenu-menu">
+            <li><a href="/signature-bowls">Signature Bowls</a></li>
+            <li><a href="/createyourbowl">Create Your Bowl</a></li>
+            <li><a href="/UserBowlPage">Bowl Planner</a></li>
+        </ul>
+
+    </div>
+</div>
