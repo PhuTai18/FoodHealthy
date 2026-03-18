@@ -1,60 +1,75 @@
 ﻿using ITHealthy.Data;
 using ITHealthy.Models;
 using ITHealthy.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC
 builder.Services.AddControllersWithViews();
-builder.Services.AddSession();
 
-// 2️⃣ Swagger
-builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+// Razor Pages (bắt buộc cho Blazor Server)
+builder.Services.AddRazorPages();
 
-// 3️⃣ Email service
-builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));
+// 🔥 Blazor Server
+builder.Services.AddServerSideBlazor();
+
+// 🔥 SignalR (quan trọng để Blazor tạo WebSocket)
+builder.Services.AddSignalR();
+
+// Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+});
+
+
+// Email
+builder.Services.Configure<EmailSetting>(
+    builder.Configuration.GetSection("EmailSetting"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// 4️⃣ Database connection
-var connectionString = builder.Configuration.GetConnectionString("ITHealthyDBConnection");
-builder.Services.AddDbContext<ITHealthyDbContext>(options =>
-    options.UseSqlServer(connectionString)
-);
 
-// 5️⃣ JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"];
-
-
-
-//Cloudiary service
+// Cloudinary
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<CloudinaryService>();
 
+
+// Database
+builder.Services.AddDbContext<ITHealthyDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("ITHealthyDBConnection")));
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// Error
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+
+// Middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
 app.UseSession();
 
 app.UseAuthorization();
 
 
+// 🔥 Blazor WebSocket Hub
+app.MapBlazorHub();
+
+// Razor Pages
+app.MapRazorPages();
+
+// MVC
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

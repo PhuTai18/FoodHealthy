@@ -1,0 +1,92 @@
+@model ITHealthy.DTOs.ProductDTO
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="max-w-6xl mx-auto px-6 py-10 mb-24">
+
+    <!-- 🔙 BACK -->
+    <a href="/products"
+       class="inline-flex items-center gap-2 text-[#3E0D1C] font-semibold mb-6 hover:underline">
+        ← Quay lại sản phẩm
+    </a>
+
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+
+        <!-- 🔥 IMAGE -->
+        <div class="flex justify-center">
+            <div class="relative">
+                <img src="@Model.ImageProduct"
+                     class="w-80 h-80 object-contain rounded-full bg-white p-6 shadow-xl" />
+
+                <!-- CALORIES BADGE -->
+                <div class="absolute bottom-0 right-0 bg-[#ff623e] text-white px-4 py-2 rounded-full shadow">
+                    @Model.Calories kcal
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 INFO -->
+        <div>
+
+            <!-- NAME -->
+            <h1 class="text-4xl font-bold text-[#3E0D1C] mb-3">
+                @Model.ProductName
+            </h1>
+
+            <!-- CATEGORY -->
+            <p class="text-gray-500 mb-4">
+                Danh mục: @Model.CategoryName
+            </p>
+
+            <!-- DESC -->
+            <p class="text-gray-700 mb-6 leading-relaxed">
+                @Model.DescriptionProduct
+            </p>
+
+            <!-- 🔥 NUTRITION BOX -->
+            <div class="grid grid-cols-3 gap-4 mb-8">
+
+                <div class="bg-[#fff8f0] rounded-xl p-4 text-center shadow">
+                    <div class="text-xl font-bold text-[#3E0D1C]">
+                        @(Model.Protein ?? 0)
+                    </div>
+                    <div class="text-sm text-gray-500">Protein</div>
+                </div>
+
+                <div class="bg-[#fff8f0] rounded-xl p-4 text-center shadow">
+                    <div class="text-xl font-bold text-[#3E0D1C]">
+                        @(Model.Carbs ?? 0)
+                    </div>
+                    <div class="text-sm text-gray-500">Carbs</div>
+                </div>
+
+                <div class="bg-[#fff8f0] rounded-xl p-4 text-center shadow">
+                    <div class="text-xl font-bold text-[#3E0D1C]">
+                        @(Model.Fat ?? 0)
+                    </div>
+                    <div class="text-sm text-gray-500">Fat</div>
+                </div>
+
+            </div>
+
+            <!-- PRICE + ACTION -->
+            <div class="flex items-center gap-6">
+
+                <span class="text-3xl font-bold text-[#ff623e]">
+                    @((Model.BasePrice ?? 0).ToString("N0")) đ
+                </span>
+
+                <button onclick="addToCart(@Model.ProductId, @Model.BasePrice)"
+                        class="bg-[#ff623e] text-white px-6 py-3 rounded-full shadow hover:bg-[#e55734] hover:scale-105 transition">
+                    🛒 Thêm vào giỏ
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

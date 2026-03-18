@@ -1,0 +1,70 @@
+@{
+    var slides = new[]
+    {
+        new {
+            Title = "Thịt sous-vide mới toanh",
+            Subtitle = "MỚI",
+            Description = "Hai siêu phẩm mới với phương pháp sous-vide nấu chậm 4 giờ...",
+            Image = "https://soumaki.com.vn/wp-content/uploads/2024/05/L4-Bowls-scaled.webp"
+        },
+        new {
+            Title = "Tiệc tối thân mật cùng Sou-mates!",
+            Subtitle = "MỚI",
+            Description = "Quây quần trong không gian tươi xanh và đầy cảm hứng...",
+            Image = "https://soumaki.com.vn/wp-content/uploads/2024/05/TNU_9289m-scaled.webp"
+        }
+    };
+}
+
+<div class="py-12 bg-gradient-to-br from-green-50 to-blue-50">
+    <div class="max-w-7xl mx-auto px-4 relative">
+
+        <div class="swiper mySwiper">
+
+            <div class="swiper-wrapper">
+
+                @foreach (var slide in slides)
+                {
+                    <div class="swiper-slide">
+                        <div class="grid md:grid-cols-2 gap-8 items-center min-h-[500px] py-8">
+
+                            <!-- TEXT -->
+                            <div class="space-y-6 px-8">
+                                <p class="text-green-600 font-semibold text-sm uppercase tracking-wider">
+                                    @slide.Subtitle
+                                </p>
+
+                                <h2 class="text-5xl font-bold text-gray-800 leading-tight">
+                                    @slide.Title
+                                </h2>
+
+                                <p class="text-gray-600 text-lg leading-relaxed">
+                                    @slide.Description
+                                </p>
+                            </div>
+
+                            <!-- IMAGE -->
+                            <div class="relative h-[500px] rounded-2xl overflow-hidden">
+                                <img src="@slide.Image"
+                                     class="w-full h-full object-cover" />
+
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <!-- NAV -->
+            <div class="swiper-button-prev custom-nav"></div>
+            <div class="swiper-button-next custom-nav"></div>
+
+            <!-- PAGINATION -->
+            <div class="swiper-pagination"></div>
+
+        </div>
+
+    </div>
+</div>

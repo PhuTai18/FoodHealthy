@@ -1,0 +1,231 @@
+@using ITHealthy.Models
+@using ITHealthy.Data
+@using Microsoft.EntityFrameworkCore
+@using BCrypt.Net
+
+@inject ITHealthyDbContext _context
+
+
+<h2 class="text-2xl font-bold mb-6">Quản lý nhân viên</h2>
+
+<button class="bg-indigo-600 text-white px-4 py-2 rounded mb-4"
+        @onclick="OpenCreate">
+    Thêm nhân viên
+</button>
+
+<p class="mb-2 text-gray-600">Total Staff: @staffs.Count</p>
+
+<table class="w-full border bg-white">
+    <thead class="bg-gray-200">
+        <tr>
+            <th class="p-2">ID</th>
+            <th class="p-2">Tên</th>
+            <th class="p-2">Email</th>
+            <th class="p-2">Phone</th>
+            <th class="p-2">Role</th>
+            <th class="p-2">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var staff in staffs)
+        {
+            <tr class="border">
+                <td class="p-2">@staff.StaffId</td>
+                <td class="p-2">@staff.FullName</td>
+                <td class="p-2">@staff.Email</td>
+                <td class="p-2">@staff.Phone</td>
+                <td class="p-2">@staff.RoleStaff</td>
+
+                <td class="p-2 space-x-2">
+
+                    <button class="bg-yellow-500 text-white px-2 py-1 rounded"
+                            @onclick="() => EditStaff(staff)">
+                        Edit
+                    </button>
+
+                    <button class="bg-red-600 text-white px-2 py-1 rounded"
+                            @onclick="() => DeleteStaff(staff.StaffId)">
+                        Delete
+                    </button>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (showForm)
+{
+<div class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+
+    <div class="bg-white p-6 rounded w-96">
+
+        <h3 class="text-xl font-bold mb-4">@formTitle</h3>
+
+        <input class="border p-2 w-full mb-2"
+               placeholder="Full Name"
+               @bind="staffForm.FullName" />
+
+        <input class="border p-2 w-full mb-2"
+               placeholder="Email"
+               @bind="staffForm.Email" />
+
+        <input class="border p-2 w-full mb-2"
+               placeholder="Phone"
+               @bind="staffForm.Phone" />
+
+        <input class="border p-2 w-full mb-2"
+               placeholder="Role"
+               @bind="staffForm.RoleStaff" />
+
+        <input type="password"
+               class="border p-2 w-full mb-2"
+               placeholder="Password"
+               @bind="password" />
+
+        <div class="flex justify-end space-x-2">
+
+            <button class="bg-gray-400 text-white px-3 py-1 rounded"
+                    @onclick="CloseForm">
+                Cancel
+            </button>
+
+            <button class="bg-green-600 text-white px-3 py-1 rounded"
+                    @onclick="SaveStaff">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+}
+
+@code {
+
+    List<Staff> staffs = new();
+
+    Staff staffForm = new();
+
+    bool showForm = false;
+
+    string formTitle = "";
+
+    string password = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStaff();
+    }
+
+
+    async Task LoadStaff()
+    {
+        staffs = await _context.Staff.ToListAsync();
+    }
+
+
+    void OpenCreate()
+    {
+        staffForm = new Staff
+        {
+            IsActive = true
+        };
+
+        password = "";
+        formTitle = "Create Staff";
+        showForm = true;
+    }
+
+
+    void EditStaff(Staff staff)
+    {
+        staffForm = new Staff
+        {
+            StaffId = staff.StaffId,
+            FullName = staff.FullName,
+            Email = staff.Email,
+            Phone = staff.Phone,
+            RoleStaff = staff.RoleStaff,
+            IsActive = staff.IsActive
+        };
+
+        password = "";
+        formTitle = "Edit Staff";
+        showForm = true;
+    }
+
+
+    void CloseForm()
+    {
+        showForm = false;
+    }
+
+
+    async Task SaveStaff()
+    {
+        try
+        {
+            if (staffForm.StaffId == 0)
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    Console.WriteLine("Password required");
+                    return;
+                }
+
+                staffForm.PasswordHash = BCrypt.HashPassword(password);
+                staffForm.IsActive = true;
+
+                _context.Staff.Add(staffForm);
+            }
+            else
+            {
+                var dbStaff = await _context.Staff.FindAsync(staffForm.StaffId);
+
+                if (dbStaff != null)
+                {
+                    dbStaff.FullName = staffForm.FullName;
+                    dbStaff.Email = staffForm.Email;
+                    dbStaff.Phone = staffForm.Phone;
+                    dbStaff.RoleStaff = staffForm.RoleStaff;
+
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        dbStaff.PasswordHash = BCrypt.HashPassword(password);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            showForm = false;
+
+            await LoadStaff();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+
+    async Task DeleteStaff(int id)
+    {
+        var staff = await _context.Staff.FindAsync(id);
+
+        if (staff != null)
+        {
+            _context.Staff.Remove(staff);
+
+            await _context.SaveChangesAsync();
+
+            await LoadStaff();
+        }
+    }
+
+}

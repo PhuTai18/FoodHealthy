@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>ITHealthy Admin</title>
+
+<base href="/" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-100 h-screen overflow-hidden">
+
+<div class="flex h-full">
+
+    <!-- Sidebar -->
+    <div class="h-full">
+        @await Component.InvokeAsync("AdminSidebar")
+    </div>
+
+    <div class="flex flex-col flex-1 h-full">
+
+        <!-- Header -->
+        <div class="flex-shrink-0">
+            @await Component.InvokeAsync("AdminHeader")
+        </div>
+
+        <!-- Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            @RenderBody()
+        </main>
+
+    </div>
+
+</div>
+
+<script>
+
+function toggleMenu(menuId) {
+
+    let menu = document.getElementById(menuId);
+
+    if(menu){
+        menu.classList.toggle("hidden");
+    }
+
+}
+
+</script>
+
+<!-- Blazor -->
+<script src="/_framework/blazor.server.js"></script>
+
+</body>
+</html>

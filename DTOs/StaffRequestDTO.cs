@@ -1,21 +1,20 @@
-using System;
 using Microsoft.AspNetCore.Http;
 
 namespace ITHealthy.DTOs
 {
     public class StaffRequestDTO
     {
-        public required int StaffId { get; set; }
+        public int? StaffId { get; set; }
 
-        public required int? StoreId { get; set; }
+        public int? StoreId { get; set; }
 
-        public required string FullName { get; set; } = null!;
+        public string FullName { get; set; } = null!;
 
-        public required string? Phone { get; set; }
+        public string? Phone { get; set; }
 
         public string? Email { get; set; }
 
-        public required string PasswordHash { get; set; } = null!;
+        public string? PasswordHash { get; set; }
 
         public string? Gender { get; set; }
 
@@ -25,7 +24,8 @@ namespace ITHealthy.DTOs
 
         public DateOnly? HireDate { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public IFormFile? Avatar { get; set; }
-        public bool? IsActive { get; internal set; }
     }
 }

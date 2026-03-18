@@ -1,0 +1,87 @@
+@model ITHealthy.DTOs.ProductDTO
+
+<div onclick="goToDetail(@Model.ProductId)"
+     class="group relative flex flex-col items-center bg-[#fff8f0] rounded-3xl p-5 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer">
+
+    <!-- ❤️ Favorite -->
+    <div class="absolute top-4 left-4 z-20 w-10 h-10 flex items-center justify-center rounded-full"
+         style="background-color:#ff623e;color:#f5edd8;">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             fill="currentColor"
+             viewBox="0 0 24 24"
+             class="w-6 h-6">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+            2 6 3.5 4 5.5 4c1.54 0 3.04.99 3.57 2.36h1.87C13.46 4.99 
+            14.96 4 16.5 4 18.5 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 
+            11.54L12 21.35z" />
+        </svg>
+    </div>
+
+    <!-- 🖼 IMAGE -->
+    <div class="relative w-full flex justify-center mb-4">
+
+        <!-- 🌈 glow nền (không đè ảnh) -->
+        <div class="absolute w-40 h-40 bg-purple-300 opacity-20 blur-3xl rounded-full bottom-2 z-0"></div>
+
+        <!-- 🥗 PRODUCT IMAGE -->
+        <img src="@Model.ImageProduct"
+             loading="lazy"
+             class="relative z-10 w-52 h-52 object-contain drop-shadow-xl transition-transform duration-300 group-hover:scale-105" />
+
+        <!-- ⚫ shadow dưới chân -->
+        <div class="absolute bottom-2 w-28 h-6 bg-black/20 blur-md rounded-full z-0"></div>
+    </div>
+
+    <!-- 🏷 TITLE -->
+    <div class="flex justify-between items-center w-full mb-2">
+        <h3 class="text-xl font-bold text-[#3E0D1C]">
+            @Model.ProductName
+        </h3>
+
+        @if (Model.Calories != null)
+        {
+            <span class="text-sm font-semibold text-[#3E0D1C] border border-[#3E0D1C] rounded-full px-3 py-1">
+                @Model.Calories CALORIES
+            </span>
+        }
+    </div>
+
+    <!-- 📄 DESCRIPTION -->
+    <p class="text-gray-700 text-sm mb-3 text-center min-h-[40px]">
+        @Model.DescriptionProduct
+    </p>
+
+    <div class="w-full border-dotted border-b border-gray-400 mb-3"></div>
+
+    <!-- 📊 NUTRITION -->
+    <div class="flex justify-around w-full text-[#3E0D1C] font-semibold mb-4">
+
+        <div class="flex flex-col items-center">
+            <span class="text-lg">@(@Model.Protein ?? 0)</span>
+            <span class="text-xs text-gray-500">PROTEIN</span>
+        </div>
+
+        <div class="flex flex-col items-center">
+            <span class="text-lg">@(@Model.Carbs ?? 0)</span>
+            <span class="text-xs text-gray-500">CARBS</span>
+        </div>
+
+        <div class="flex flex-col items-center">
+            <span class="text-lg">@(@Model.Fat ?? 0)</span>
+            <span class="text-xs text-gray-500">FAT</span>
+        </div>
+
+    </div>
+
+    <!-- 💰 PRICE -->
+    <p class="text-[#ff623e] font-bold text-lg mb-3">
+        @((Model.BasePrice ?? 0).ToString("N0"))₫
+    </p>
+
+    <!-- 🔘 BUTTON -->
+    <button onclick="downloadRecipe(event, '@Model.ProductName')"
+            class="w-full py-2 bg-[#ff623e] text-white font-semibold rounded-full hover:bg-[#e55734] transition-all">
+        Download recipe
+    </button>
+
+</div>
