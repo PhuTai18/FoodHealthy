@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
-
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 namespace ITHealthy.Controllers
@@ -26,25 +28,59 @@ namespace ITHealthy.Controllers
 
 
         //Login
-        public IActionResult Login()
+        public IActionResult Login(string? message)
         {
+            if (message == "login_required")
+            {
+                ViewBag.Message = "Vui lòng đăng nhập để trải nghiệm mua sắm";
+            }
+
             return View();
         }
+        // [HttpPost]
+        // public async Task<IActionResult> Login(LoginDTO dto)
+        // {
+        //     var customer = await _context.Customers
+        //         .FirstOrDefaultAsync(u => u.Email == dto.Email);
+        //     if (customer == null)
+        //     {
+        //         ModelState.AddModelError("", "Email không tồn tại trong hệ thống");
+        //         return View(dto);
+        //     }
+        //     if (!VerifyPassword(dto.Password, customer.PasswordHash))
+        //     {
+        //         ModelState.AddModelError("", "Mật khẩu không đúng");
+        //         return View(dto);
+        //     }
+        //     if (customer.IsActive == false)
+        //     {
+        //         await SendOtpAsync(customer.CustomerId);
+        //         TempData["Email"] = customer.Email;
+        //         return RedirectToAction("VerifyOtp");
+        //     }
+
+        //     HttpContext.Session.SetString("Email", customer.Email);
+        //     HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
+        //     return RedirectToAction("", "Home");
+        // }
         [HttpPost]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
             if (customer == null)
             {
-                ModelState.AddModelError("", "Email không tồn tại trong hệ thống");
+                ModelState.AddModelError("", "Email không tồn tại");
                 return View(dto);
             }
+
             if (!VerifyPassword(dto.Password, customer.PasswordHash))
             {
                 ModelState.AddModelError("", "Mật khẩu không đúng");
                 return View(dto);
             }
+
             if (customer.IsActive == false)
             {
                 await SendOtpAsync(customer.CustomerId);
@@ -52,9 +88,30 @@ namespace ITHealthy.Controllers
                 return RedirectToAction("VerifyOtp");
             }
 
+            // 🔥 1. TẠO CLAIMS
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, customer.Email),
+        new Claim("CustomerId", customer.CustomerId.ToString()),
+        new Claim(ClaimTypes.Role, customer.RoleUser ?? "User")
+    };
+
+            var identity = new ClaimsIdentity(claims,
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            // 🔥 2. LOGIN (COOKIE)
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal);
+
+            // 🔥 3. SESSION (GIỮ LẠI nếu bạn muốn)
             HttpContext.Session.SetString("Email", customer.Email);
             HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
-            return RedirectToAction("", "Home");
+            HttpContext.Session.SetString("FullName", customer.FullName);
+
+            return RedirectToAction("Index", "Home");
         }
 
 
@@ -183,10 +240,13 @@ namespace ITHealthy.Controllers
 
 
         // LOGOUT
-        public IActionResult Logout()
+        [HttpPost]
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            await HttpContext.SignOutAsync(); // xóa cookie
+            HttpContext.Session.Clear();      // xóa session
+
+            return RedirectToAction("Index", "Home");
         }
 
 

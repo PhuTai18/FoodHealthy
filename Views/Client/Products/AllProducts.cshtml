@@ -120,10 +120,20 @@
                                         @((p.BasePrice ?? 0).ToString("N0")) đ
                                     </span>
 
-                                    <button onclick="event.preventDefault(); addToCart(@p.ProductId, @p.BasePrice)"
+                                    @* <button onclick="event.preventDefault(); addToCart(@p.ProductId, @p.BasePrice)"
                                             class="w-10 h-10 flex items-center justify-center bg-[#ff623e] text-white rounded-full hover:bg-[#e55734]">
                                         +
-                                    </button>
+                                    </button> *@
+                                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+    <input type="hidden" name="ProductId" value="@p.ProductId" />
+    <input type="hidden" name="Quantity" value="1" />
+    <input type="hidden" name="UnitPrice" value="@p.BasePrice" />
+
+    <button type="submit"
+            class="w-10 h-10 flex items-center justify-center bg-[#ff623e] text-white rounded-full">
+        +
+    </button>
+</form>
                                 </div>
 
                             </div>
@@ -154,5 +164,22 @@
         if (el) {
             el.scrollIntoView({ behavior: "smooth" });
         }
+    }
+</script>
+
+<script>
+    function addToCartHandler(productId, price) {
+        const isAuthenticated = '@User.Identity.IsAuthenticated'.toLowerCase() === 'true';
+
+        if (!isAuthenticated) {
+            alert("Vui lòng đăng nhập để trải nghiệm mua sắm");
+
+            // redirect sang login
+            window.location.href = "/Auth/Login?message=login_required";
+            return;
+        }
+
+        // nếu đã login → gọi API thêm vào giỏ
+        addToCart(productId, price);
     }
 </script>

@@ -50,4 +50,5 @@ public partial class Customer
     public virtual ICollection<UserPreference> UserPreferences { get; set; } = new List<UserPreference>();
 
     public virtual ICollection<VoucherRedemption> VoucherRedemptions { get; set; } = new List<VoucherRedemption>();
+    //public string Username { get; internal set; }
 }

@@ -7,8 +7,7 @@
 <div class="max-w-6xl mx-auto px-6 py-10 mb-24">
 
     <!-- 🔙 BACK -->
-    <a href="/products"
-       class="inline-flex items-center gap-2 text-[#3E0D1C] font-semibold mb-6 hover:underline">
+    <a href="/products"       class="inline-flex items-center gap-2 text-[#3E0D1C] font-semibold mb-6 hover:underline">
         ← Quay lại sản phẩm
     </a>
 
@@ -17,8 +16,7 @@
         <!-- 🔥 IMAGE -->
         <div class="flex justify-center">
             <div class="relative">
-                <img src="@Model.ImageProduct"
-                     class="w-80 h-80 object-contain rounded-full bg-white p-6 shadow-xl" />
+                <img src="@Model.ImageProduct"           class="w-80 h-80 object-contain rounded-full bg-white p-6 shadow-xl" />
 
                 <!-- CALORIES BADGE -->
                 <div class="absolute bottom-0 right-0 bg-[#ff623e] text-white px-4 py-2 rounded-full shadow">
@@ -78,10 +76,20 @@
                     @((Model.BasePrice ?? 0).ToString("N0")) đ
                 </span>
 
-                <button onclick="addToCart(@Model.ProductId, @Model.BasePrice)"
+                @* <button onclick="addToCart(@Model.ProductId, @Model.BasePrice)"
                         class="bg-[#ff623e] text-white px-6 py-3 rounded-full shadow hover:bg-[#e55734] hover:scale-105 transition">
                     🛒 Thêm vào giỏ
-                </button>
+                </button> *@
+                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                    <input type="hidden" name="Quantity" value="1" />
+                    <input type="hidden" name="UnitPrice" value="@Model.BasePrice" />
+
+                    <button type="submit"
+                            class="bg-[#ff623e] text-white px-6 py-3 rounded-full shadow hover:bg-[#e55734]">
+                        🛒 Thêm vào giỏ
+                    </button>
+                </form>
 
             </div>
 

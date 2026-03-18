@@ -89,7 +89,13 @@
                         @((meal.BasePrice ?? 0).ToString("N0")) đ
                     </span>
 
-                    <button onclick="addToCart(@meal.ProductId, @meal.BasePrice)"               class="w-10 h-10 flex items-center justify-center 
+                    @* <button onclick="addToCart(@meal.ProductId, @meal.BasePrice)"               class="w-10 h-10 flex items-center justify-center 
+                        bg-[#ff623e] text-white rounded-full shadow
+                        hover:scale-110 hover:bg-[#e55734] transition">
+                        +
+                    </button>
+                     *@
+                    <button onclick="addToCart(@meal.ProductId, @meal.BasePrice)"        class="w-10 h-10 flex items-center justify-center 
                         bg-[#ff623e] text-white rounded-full shadow
                         hover:scale-110 hover:bg-[#e55734] transition">
                         +
@@ -115,7 +121,41 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
     </button>
-
-
-
 </div>
+
+<script>
+    function addToCart(productId, price) {
+
+        const isLoggedIn = '@User.Identity.IsAuthenticated' === 'True';
+
+        if (!isLoggedIn) {
+            alert("Vui lòng đăng nhập để trải nghiệm mua sắm");
+            window.location.href = "/Auth/Login?message=login_required";
+            return;
+        }
+
+        // 🔥 gửi dạng form-data (MVC chuẩn)
+        const formData = new URLSearchParams();
+        formData.append("ProductId", productId);
+        formData.append("Quantity", 1);
+        formData.append("UnitPrice", price);
+
+        fetch('/carts/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        })
+        .then(res => {
+            // ✅ MVC sẽ redirect → xử lý ở đây
+            if (res.redirected) {
+                window.location.href = res.url;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ Có lỗi xảy ra");
+        });
+    }
+</script>
