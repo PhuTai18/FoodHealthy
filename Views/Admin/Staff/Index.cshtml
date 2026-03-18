@@ -1,8 +1,10 @@
-@using FoodHealthy.Components.Admin
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@namespace FoodHealthy.Components.Admin
 
 @{
     Layout = "~/Views/Admin/Shared/_LayoutAdmin.cshtml";
 }
 
-<component type="typeof(StaffTable)" render-mode="ServerPrerendered" />
+<div class="p-6">
+    <component type="typeof(FoodHealthy.Components.Admin.StaffTable)" 
+               render-mode="Server" />
+</div>

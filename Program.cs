@@ -1,55 +1,61 @@
 ﻿using ITHealthy.Data;
 using ITHealthy.Models;
 using ITHealthy.Services;
+using ITHealthy.Services.Admin;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =========================
+// SERVICES
+// =========================
+
 // MVC
 builder.Services.AddControllersWithViews();
 
-// Razor Pages (bắt buộc cho Blazor Server)
+// Razor Pages (bắt buộc cho Blazor)
 builder.Services.AddRazorPages();
 
 // 🔥 Blazor Server
 builder.Services.AddServerSideBlazor();
 
-// 🔥 SignalR (quan trọng để Blazor tạo WebSocket)
-builder.Services.AddSignalR();
+// ❌ KHÔNG CẦN dòng này (Blazor đã dùng sẵn)
+// builder.Services.AddSignalR();
 
 // Session
 builder.Services.AddSession();
 
+// =========================
+// DI SERVICES
+// =========================
+builder.Services.AddScoped<IStaffService, StaffService>();
 
-// Email
 builder.Services.Configure<EmailSetting>(
     builder.Configuration.GetSection("EmailSetting"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-
-// Cloudinary
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<CloudinaryService>();
 
-
-// Database
+// =========================
+// DATABASE
+// =========================
 builder.Services.AddDbContext<ITHealthyDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("ITHealthyDBConnection")));
 
 var app = builder.Build();
 
-
-// Error
+// =========================
+// MIDDLEWARE
+// =========================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-
-// Middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -59,11 +65,14 @@ app.UseSession();
 
 app.UseAuthorization();
 
+// =========================
+// ENDPOINTS
+// =========================
 
-// 🔥 Blazor WebSocket Hub
+// 🔥 BẮT BUỘC cho Blazor
 app.MapBlazorHub();
 
-// Razor Pages
+// Razor Pages (cho _Host)
 app.MapRazorPages();
 
 // MVC

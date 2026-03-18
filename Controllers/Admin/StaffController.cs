@@ -60,7 +60,7 @@ namespace ITHealthy.Controllers
         [HttpGet("create")]
         public IActionResult Create()
         {
-            return View("~/Views/Admin/Staff/Create.cshtml");
+            return View("~/Views/Admin/Staff/Index.cshtml");
         }
 
         [HttpPost("create")]
@@ -69,19 +69,19 @@ namespace ITHealthy.Controllers
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ.";
-                return View("~/Views/Admin/Staff/Create.cshtml", request);
+                return View("~/Views/Admin/Staff/Index.cshtml", request);
             }
 
             if (await _context.Staff.AnyAsync(s => s.Email == request.Email))
             {
                 TempData["Error"] = "Email đã tồn tại.";
-                return View("~/Views/Admin/Staff/Create.cshtml", request);
+                return View("~/Views/Admin/Staff/Index.cshtml", request);
             }
 
             if (await _context.Staff.AnyAsync(s => s.Phone == request.Phone))
             {
                 TempData["Error"] = "Số điện thoại đã tồn tại.";
-                return View("~/Views/Admin/Staff/Create.cshtml", request);
+                return View("~/Views/Admin/Staff/Index.cshtml", request);
             }
 
             string? avatarUrl = null;
