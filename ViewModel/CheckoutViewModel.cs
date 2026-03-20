@@ -1,9 +1,14 @@
+using ITHealthy.Models;
+
 public class CheckoutViewModel
 {
     public int CartId { get; set; }
     public int CustomerId { get; set; }
 
     public List<CheckoutItemViewModel> Items { get; set; }
+
+
+
 
     public decimal TotalPrice { get; set; }
     public decimal? Discount { get; set; } // giảm giá tổng
@@ -16,6 +21,7 @@ public class CheckoutViewModel
     public string OrderType { get; set; } // Shipping | Pickup
     public string PaymentMethod { get; set; } // COD | MOMO
     public string? OrderNote { get; set; }
+    public List<CustomerAddress> Addresses { get; set; }
 
     public int? ShippingAddressId { get; set; }
     public string? CourierName { get; set; }

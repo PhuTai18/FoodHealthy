@@ -3,73 +3,227 @@
     ViewData["Title"] = "Checkout";
 }
 
-<h2>Checkout</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-@if (TempData["error"] != null)
-{
-    <div style="color:red">@TempData["error"]</div>
-}
-@if (TempData["success"] != null)
-{
-    <div style="color:green">@TempData["success"]</div>
-}
+<div class="container my-5">
+    <h2 class="mb-4">Thanh toán</h2>
 
-<form asp-action="Checkout" method="post">
-    <input type="hidden" name="CartId" value="@Model.CartId" />
-    <input type="hidden" name="StoreId" value="@Model.CustomerId" /> <!-- Hoặc StoreId nếu cần -->
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Combo/Bowl</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td>@item.ProductName</td>
-                    <td>
-                        @if (item.ComboId.HasValue)
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["error"]</div>
+    }
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success">@TempData["success"]</div>
+    }
+
+    <form asp-action="Checkout" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="CartId" value="@Model.CartId" />
+        <input type="hidden" name="StoreId" value="@Model.StoreId" />
+        <input type="hidden" name="ShippingAddressId" value="@Model.ShippingAddressId" />
+
+        <!-- Địa chỉ giao hàng -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Chọn địa chỉ giao hàng</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Addresses != null && Model.Addresses.Any())
+                {
+                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                        @foreach (var addr in Model.Addresses)
                         {
-                            <text>@item.ComboName</text>
+                            <div class="col">
+                                <div class="form-check border p-3 rounded position-relative">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="ShippingAddressId"
+                                           id="addr_@addr.AddressId"
+                                           value="@addr.AddressId"
+                                           @(Model.ShippingAddressId == addr.AddressId || addr.IsDefault == false ? "checked" : "") />
+
+                                    <label class="form-check-label" for="addr_@addr.AddressId">
+                                        <strong>@addr.ReceiverName</strong> - @addr.PhoneNumber <br />
+                                        @addr.StreetAddress, @addr.Ward, @addr.District, @addr.City, @addr.Country
+                                    </label>
+
+                                    @if (addr.IsDefault == false)
+                                    {
+                                        <span class="badge bg-success" style="position:absolute; top:10px; right:10px;">Mặc định</span>
+                                    }
+
+                                    <!-- Nút quản lý địa chỉ -->
+                                    <div class="mt-2">
+                                        <!-- Sửa địa chỉ collapse -->
+                                        <button class="btn btn-sm btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#editAddrForm_@addr.AddressId">Sửa</button>
+
+                                        <!-- Xóa địa chỉ -->
+                                        <form asp-controller="Checkout" asp-action="DeleteConfirmed" asp-route-id="@addr.AddressId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xoá địa chỉ này?');">Xoá</button>
+                                        </form>
+
+                                        <!-- Form chỉnh sửa địa chỉ collapse -->
+                                        <div class="collapse mt-2" id="editAddrForm_@addr.AddressId">
+                                            <form asp-controller="Checkout" asp-action="UpdateAddress" asp-route-id="@addr.AddressId" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="AddressId" value="@addr.AddressId" />
+                                                <div class="row g-2">
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="ReceiverName" value="@addr.ReceiverName" placeholder="Tên người nhận" required />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="PhoneNumber" value="@addr.PhoneNumber" placeholder="Số điện thoại" required />
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <input class="form-control" name="StreetAddress" value="@addr.StreetAddress" placeholder="Địa chỉ" required />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="Ward" value="@addr.Ward" placeholder="Phường/Xã" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="District" value="@addr.District" placeholder="Quận/Huyện" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="City" value="@addr.City" placeholder="Thành phố" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input class="form-control" name="Country" value="@addr.Country" placeholder="Quốc gia" />
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 text-end">
+                                                    <button type="submit" class="btn btn-success btn-sm">Lưu</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
-                        @if (item.BowlId.HasValue)
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.
+                    </div>
+                }
+
+                <!-- Thêm địa chỉ mới -->
+                <div class="mt-3">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addAddressForm">Thêm địa chỉ mới</button>
+                    <div class="collapse mt-2" id="addAddressForm">
+                        <form asp-controller="Checkout" asp-action="AddAddress" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <input class="form-control" name="ReceiverName" placeholder="Tên người nhận" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" name="PhoneNumber" placeholder="Số điện thoại" required />
+                                </div>
+                                <div class="col-md-12">
+                                    <input class="form-control" name="StreetAddress" placeholder="Địa chỉ" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" name="Ward" placeholder="Phường/Xã" />
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" name="District" placeholder="Quận/Huyện" />
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" name="City" placeholder="Thành phố" />
+                                </div>
+                                <div class="col-md-6">
+                                    <input class="form-control" name="Country" placeholder="Quốc gia" />
+                                </div>
+                                <div class="mt-2 text-end">
+                                    <button type="submit" class="btn btn-success btn-sm">Thêm địa chỉ</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Giỏ hàng -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5>Giỏ hàng của bạn</h5>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Combo/Bowl</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Tạm tính</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
                         {
-                            <text>@item.BowlName</text>
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>
+                                    @if (item.ComboId.HasValue) { <text>@item.ComboName</text> }
+                                    @if (item.BowlId.HasValue) { <text>@item.BowlName</text> }
+                                </td>
+                                <td>@item.Quantity</td>
+                                <td>@(item.UnitPrice ?? 0m).ToString("C2")</td>
+                                <td>@item.SubTotal.ToString("C2")</td>
+                            </tr>
                         }
-                    </td>
-                    <td>@item.Quantity</td>
-                    <td>@(item.UnitPrice ?? 0m).ToString("C")</td>
-                    <td>@item.SubTotal.ToString(format: "C2")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+                <h5 class="text-end">Tổng tiền: <strong>@Model.TotalPrice.ToString("C2")</strong></h5>
+            </div>
+        </div>
 
-    <h3>Tổng tiền: @Model.TotalPrice.ToString("C2")</h3>
+        <!-- Hình thức đặt hàng -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>Hình thức đặt hàng</h5>
+            </div>
+            <div class="card-body">
+                <select class="form-select" name="OrderType" id="OrderType" required>
+                    <option value="Shipping" selected="@(Model.OrderType == "Shipping")">Giao hàng</option>
+                    <option value="Pickup" selected="@(Model.OrderType == "Pickup")">Nhận tại cửa hàng</option>
+                </select>
+            </div>
+        </div>
 
-    <label for="OrderType">Hình thức đặt hàng:</label>
-    <select name="OrderType" id="OrderType" required>
-        <option value="Shipping">Giao hàng</option>
-        <option value="Pickup">Nhận tại cửa hàng</option>
-    </select>
+        <!-- Phương thức thanh toán -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5>Phương thức thanh toán</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="PaymentMethod" id="pay_cod" value="COD" @(Model.PaymentMethod == "COD" || string.IsNullOrEmpty(Model.PaymentMethod) ? "checked" : "") />
+                    <label class="form-check-label" for="pay_cod">COD (Thanh toán khi nhận hàng)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="PaymentMethod" id="pay_momo" value="MOMO" @(Model.PaymentMethod == "MOMO" ? "checked" : "") />
+                    <label class="form-check-label" for="pay_momo">MoMo</label>
+                </div>
+            </div>
+        </div>
 
-    <br /><br />
+        <!-- Ghi chú -->
+        <div class="mb-4">
+            <label for="OrderNote" class="form-label">Ghi chú đơn hàng</label>
+            <textarea class="form-control" name="OrderNote" id="OrderNote" rows="3">@Model.OrderNote</textarea>
+        </div>
 
-    <label>Phương thức thanh toán:</label>
-    <input type="radio" name="PaymentMethod" value="COD" checked /> COD
-    <input type="radio" name="PaymentMethod" value="MOMO" /> MoMo
+        <div class="text-end">
+            <button type="submit" class="btn btn-success btn-lg">Đặt hàng</button>
+        </div>
+    </form>
+</div>
 
-    <br /><br />
-
-    <label>Ghi chú đơn hàng:</label>
-    <textarea name="OrderNote" rows="3" cols="50">@Model.OrderNote</textarea>
-
-    <br /><br />
-
-    <button type="submit">Đặt hàng</button>
-</form>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
