@@ -55,6 +55,15 @@ builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<CloudinaryService>();
 
+
+// Đăng ký HttpClient cho MomoService
+builder.Services.AddHttpClient();
+
+
+// Đăng ký IMomoService
+builder.Services.AddScoped<IMomoService, MomoService>();
+
+
 // =========================
 // DATABASE
 // =========================

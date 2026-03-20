@@ -1,0 +1,75 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Checkout</h2>
+
+@if (TempData["error"] != null)
+{
+    <div style="color:red">@TempData["error"]</div>
+}
+@if (TempData["success"] != null)
+{
+    <div style="color:green">@TempData["success"]</div>
+}
+
+<form asp-action="Checkout" method="post">
+    <input type="hidden" name="CartId" value="@Model.CartId" />
+    <input type="hidden" name="StoreId" value="@Model.CustomerId" /> <!-- Hoặc StoreId nếu cần -->
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Combo/Bowl</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>
+                        @if (item.ComboId.HasValue)
+                        {
+                            <text>@item.ComboName</text>
+                        }
+                        @if (item.BowlId.HasValue)
+                        {
+                            <text>@item.BowlName</text>
+                        }
+                    </td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.UnitPrice ?? 0m).ToString("C")</td>
+                    <td>@item.SubTotal.ToString(format: "C2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>Tổng tiền: @Model.TotalPrice.ToString("C2")</h3>
+
+    <label for="OrderType">Hình thức đặt hàng:</label>
+    <select name="OrderType" id="OrderType" required>
+        <option value="Shipping">Giao hàng</option>
+        <option value="Pickup">Nhận tại cửa hàng</option>
+    </select>
+
+    <br /><br />
+
+    <label>Phương thức thanh toán:</label>
+    <input type="radio" name="PaymentMethod" value="COD" checked /> COD
+    <input type="radio" name="PaymentMethod" value="MOMO" /> MoMo
+
+    <br /><br />
+
+    <label>Ghi chú đơn hàng:</label>
+    <textarea name="OrderNote" rows="3" cols="50">@Model.OrderNote</textarea>
+
+    <br /><br />
+
+    <button type="submit">Đặt hàng</button>
+</form>

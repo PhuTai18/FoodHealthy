@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\FoodHealthy\\FoodHealthy\\FoodHealthy.csproj": {}
+    "C:\\Users\\ASUS\\OneDrive\\Desktop\\FoodHealthy\\FoodHealthy.csproj": {}
   },
   "projects": {
-    "D:\\FoodHealthy\\FoodHealthy\\FoodHealthy.csproj": {
+    "C:\\Users\\ASUS\\OneDrive\\Desktop\\FoodHealthy\\FoodHealthy.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\FoodHealthy\\FoodHealthy\\FoodHealthy.csproj",
+        "projectUniqueName": "C:\\Users\\ASUS\\OneDrive\\Desktop\\FoodHealthy\\FoodHealthy.csproj",
         "projectName": "FoodHealthy",
-        "projectPath": "D:\\FoodHealthy\\FoodHealthy\\FoodHealthy.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "D:\\FoodHealthy\\FoodHealthy\\obj\\",
+        "projectPath": "C:\\Users\\ASUS\\OneDrive\\Desktop\\FoodHealthy\\FoodHealthy.csproj",
+        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ASUS\\OneDrive\\Desktop\\FoodHealthy\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
