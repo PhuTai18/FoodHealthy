@@ -1,0 +1,68 @@
+@* @page "/admin/staff" *@
+@using ITHealthy.Models
+@using ITHealthy.Services
+
+@page "/admin-blazor/staff"
+@inject StaffService staffService
+@inject NavigationManager nav
+
+<h3>Quản lý Staff</h3>
+
+<button @onclick="GoCreate">+ Thêm</button>
+
+@if (staffs == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in staffs)
+            {
+                <tr>
+                    <td>@s.StaffId</td>
+                    <td>@s.FullName</td>
+                    <td>@s.Email</td>
+                    <td>
+                        <button @onclick="() => Edit(s.StaffId)">Sửa</button>
+                        <button @onclick="() => Delete(s.StaffId)">Xóa</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<Staff>? staffs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        staffs = await staffService.GetAllAsync();
+    }
+
+    void GoCreate()
+    {
+        nav.NavigateTo("/admin-blazor/staff/create");
+    }
+
+    void Edit(int id)
+    {
+        nav.NavigateTo($"/admin-blazor/staff/edit/{id}");
+    }
+
+    async Task Delete(int id)
+    {
+        await staffService.DeleteAsync(id);
+        staffs = await staffService.GetAllAsync();
+    }
+}

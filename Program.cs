@@ -1,7 +1,6 @@
 ﻿using ITHealthy.Data;
 using ITHealthy.Models;
 using ITHealthy.Services;
-using ITHealthy.Services.Admin;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -40,12 +39,28 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             context.Response.Redirect("/Auth/Login?message=login_required");
             return Task.CompletedTask;
         };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/Admin"))
+            {
+                context.Response.Redirect("/Admin/Login");
+            }
+            else
+            {
+                context.Response.Redirect("/Auth/Login");
+            }
+            return Task.CompletedTask;
+        };
     });
+
+
 
 // =========================
 // DI SERVICES
 // =========================
-builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<StaffService>();
+
 
 builder.Services.Configure<EmailSetting>(
     builder.Configuration.GetSection("EmailSetting"));
@@ -82,7 +97,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -106,5 +121,8 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// 🔥 QUAN TRỌNG
+app.MapFallbackToPage("/_Host");
 
 app.Run();

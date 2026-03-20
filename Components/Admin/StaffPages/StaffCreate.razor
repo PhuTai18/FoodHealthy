@@ -1,0 +1,27 @@
+@page "/admin-blazor/staff/create"
+@using ITHealthy.Models
+@using Microsoft.AspNetCore.Components.Forms
+@layout AdminLayout
+
+@inject StaffService staffService
+@inject NavigationManager nav
+
+<h3>Thêm Staff</h3>
+
+<EditForm Model="staff" OnValidSubmit="Handle">
+    <InputText @bind-Value="staff.FullName" placeholder="Tên" />
+    <InputText @bind-Value="staff.Email" placeholder="Email" />
+    <InputText @bind-Value="staff.Phone" placeholder="Phone" />
+
+    <button type="submit">Lưu</button>
+</EditForm>
+
+@code {
+    Staff staff = new();
+
+    async Task Handle()
+    {
+        await staffService.CreateAsync(staff);
+        nav.NavigateTo("/admin-blazor/staff");
+    }
+}

@@ -3,73 +3,298 @@
     ViewData["Title"] = "Checkout";
 }
 
-<h2>Checkout</h2>
+<div class="bg-gray-50 min-h-screen py-10">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center gap-2 text-sm text-gray-600 mb-4">
 
-@if (TempData["error"] != null)
-{
-    <div style="color:red">@TempData["error"]</div>
-}
-@if (TempData["success"] != null)
-{
-    <div style="color:green">@TempData["success"]</div>
-}
+            <a asp-controller="Cart" asp-action="GetCartByCustomer"
+                   class="flex items-center gap-1 hover:text-green-600 transition">
 
-<form asp-action="Checkout" method="post">
-    <input type="hidden" name="CartId" value="@Model.CartId" />
-    <input type="hidden" name="StoreId" value="@Model.CustomerId" /> <!-- Hoặc StoreId nếu cần -->
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Combo/Bowl</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td>@item.ProductName</td>
-                    <td>
-                        @if (item.ComboId.HasValue)
+                ← Giỏ hàng
+            </a>
+
+            <span>/</span>
+
+            <span class="text-green-600 font-semibold">
+                Thanh toán
+            </span>
+        </div>
+
+        <!-- HEADER -->
+        <h2 class="text-3xl font-bold mb-2">Thanh toán đơn hàng</h2>
+        <p class="text-gray-500 mb-6">@Model.Items.Count sản phẩm</p>
+
+        <!-- ALERT -->
+        @if (TempData["error"] != null)
+        {
+            <div class="bg-red-100 text-red-600 p-3 rounded mb-4">
+                @TempData["error"]
+            </div>
+        }
+        @if (TempData["success"] != null)
+        {
+            <div class="bg-green-100 text-green-600 p-3 rounded mb-4">
+                @TempData["success"]
+            </div>
+        }
+
+        <form asp-action="Checkout" method="post" id="checkoutForm">
+
+            <input type="hidden" name="CartId" value="@Model.CartId" />
+            <input type="hidden" name="StoreId" id="StoreId" value="@Model.StoreId" />
+
+            <div class="grid lg:grid-cols-3 gap-8">
+
+                <!-- LEFT -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <div class="bg-white rounded-2xl shadow p-6">
+                        @foreach (var item in Model.Items)
                         {
-                            <text>@item.ComboName</text>
+                            <div class="flex gap-4 border-b pb-3">
+
+                                <!-- IMAGE -->
+                                <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                    <img src="@(string.IsNullOrEmpty(item.ImageProduct) 
+                                                                                                                                                                      ? "https://via.placeholder.com/100"
+                                                                                                                                                                      : item.ImageProduct)"
+                                         class="w-full h-full object-cover" />
+                                </div>
+
+                                <!-- INFO -->
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">
+                                        @item.ProductName: @item.DescriptionProduct
+                                    </p>
+
+                                    @if (!string.IsNullOrEmpty(item.ComboName))
+                                    {
+                                        <p class="text-xs text-gray-500">
+                                            Combo: @item.ComboName
+                                        </p>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(item.BowlName))
+                                    {
+                                        <p class="text-xs text-gray-500">
+                                            Bowl: @item.BowlName
+                                        </p>
+                                    }
+
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        SL : @item.Quantity
+                                    </p>
+                                </div>
+
+                                <!-- PRICE -->
+                                <div class="text-right">
+                                    <p class="text-green-600 font-semibold">
+                                        @item.SubTotal.ToString("N0") đ
+                                    </p>
+                                </div>
+
+                            </div>
                         }
-                        @if (item.BowlId.HasValue)
-                        {
-                            <text>@item.BowlName</text>
-                        }
-                    </td>
-                    <td>@item.Quantity</td>
-                    <td>@(item.UnitPrice ?? 0m).ToString("C")</td>
-                    <td>@item.SubTotal.ToString(format: "C2")</td>
-                </tr>
+                    </div>
+
+                    <!-- SHIPPING -->
+                    <div class="bg-white rounded-2xl shadow p-6">
+                        <h3 class="text-xl font-semibold mb-4">
+                            🚚 Hình thức nhận hàng
+                        </h3>
+
+                        <div class="space-y-3">
+
+                            <label class="shipping-card block border-2 p-4 rounded-xl cursor-pointer">
+                                <input type="radio" name="OrderType" value="Shipping" checked hidden>
+                                📦 Giao hàng tận nơi
+                            </label>
+
+                            <label class="shipping-card block border-2 p-4 rounded-xl cursor-pointer">
+                                <input type="radio" name="OrderType" value="Pickup" hidden>
+                                🏪 Nhận tại cửa hàng
+                            </label>
+
+                        </div>
+
+                        <!-- STORE LIST -->
+                        <div id="storeSection" class="mt-4 hidden">
+
+                            <h4 class="font-semibold mb-3">Chọn cửa hàng</h4>
+
+                            <div class="space-y-3 max-h-64 overflow-y-auto">
+
+                                @foreach (var store in ViewBag.Stores)
+                                {
+                                    <div class="store-card border-2 rounded-xl p-4 cursor-pointer">
+
+                                        <input type="hidden" value="@store.StoreId" />
+
+                                        <div class="flex justify-between">
+                                            <p class="font-semibold">@store.StoreName</p>
+
+                                            @if (store.Rating != null)
+                                            {
+                                                <span class="text-yellow-500 text-sm">
+                                                    ⭐ @store.Rating
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            📍 @store.StreetAddress, @store.District, @store.City
+                                        </p>
+
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            📞 @store.Phone
+                                        </p>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAYMENT -->
+                    <div class="bg-white rounded-2xl shadow p-6">
+                        <h3 class="text-xl font-semibold mb-4">
+                            💳 Thanh toán
+                        </h3>
+
+                        <div class="space-y-3">
+
+                            <label class="payment-card block border-2 p-4 rounded-xl cursor-pointer">
+                                <input type="radio" name="PaymentMethod" value="COD" checked hidden>
+                                💵 Thanh toán khi nhận (COD)
+                            </label>
+
+                            <label class="payment-card block border-2 p-4 rounded-xl cursor-pointer">
+                                <input type="radio" name="PaymentMethod" value="MOMO" hidden>
+                                🟣 Ví MoMo
+                            </label>
+
+                        </div>
+                    </div>
+
+                    <!-- NOTE -->
+                    <div class="bg-white rounded-2xl shadow p-6">
+                        <h3 class="font-semibold mb-2">📝 Ghi chú</h3>
+
+                        <textarea name="OrderNote"
+                                  class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500"
+                                  rows="3">@Model.OrderNote</textarea>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-24">
+
+                        <div class="bg-white rounded-2xl shadow p-6">
+
+                            <h3 class="font-semibold mb-4">Tổng thanh toán</h3>
+
+                            <div class="space-y-2 text-sm">
+
+                                <div class="flex justify-between">
+                                    <span>Tạm tính</span>
+                                    <span id="subtotal">@Model.TotalPrice.ToString("N0")</span>
+                                </div>
+
+                                <div class="flex justify-between">
+                                    <span>Phí ship</span>
+                                    <span id="shippingFee">30,000</span>
+                                </div>
+
+                                <div class="border-t pt-3 flex justify-between font-bold">
+                                    <span>Tổng</span>
+                                    <span id="total">@Model.TotalPrice.ToString("N0")</span>
+                                </div>
+
+                            </div>
+
+                            <button type="submit"
+                                    class="w-full mt-4 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition">
+                                🛡️ Đặt hàng
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+    const shippingCards = document.querySelectorAll(".shipping-card");
+    const paymentCards = document.querySelectorAll(".payment-card");
+    const storeCards = document.querySelectorAll(".store-card");
+
+    const storeSection = document.getElementById("storeSection");
+    const storeInput = document.getElementById("StoreId");
+
+    const subtotal = parseFloat("@Model.TotalPrice");
+    const shippingFeeEl = document.getElementById("shippingFee");
+    const totalEl = document.getElementById("total");
+
+    const shippingPrices = {
+        Shipping: 30000,
+        Pickup: 0
+    };
+
+    // SHIPPING
+    shippingCards.forEach(card => {
+        card.addEventListener("click", () => {
+
+            shippingCards.forEach(c => c.classList.remove("border-green-500", "bg-green-50"));
+            card.classList.add("border-green-500", "bg-green-50");
+
+            let input = card.querySelector("input");
+            input.checked = true;
+
+            let type = input.value;
+
+            // show store
+            if (type === "Pickup") {
+                storeSection.classList.remove("hidden");
+            } else {
+                storeSection.classList.add("hidden");
+                storeInput.value = "";
             }
-        </tbody>
-    </table>
 
-    <h3>Tổng tiền: @Model.TotalPrice.ToString("C2")</h3>
+            // update price
+            let fee = shippingPrices[type];
+            shippingFeeEl.innerText = fee.toLocaleString();
+            totalEl.innerText = (subtotal + fee).toLocaleString();
+        });
+    });
 
-    <label for="OrderType">Hình thức đặt hàng:</label>
-    <select name="OrderType" id="OrderType" required>
-        <option value="Shipping">Giao hàng</option>
-        <option value="Pickup">Nhận tại cửa hàng</option>
-    </select>
+    // STORE SELECT
+    storeCards.forEach(card => {
+        card.addEventListener("click", () => {
 
-    <br /><br />
+            storeCards.forEach(c => c.classList.remove("border-green-500", "bg-green-50"));
+            card.classList.add("border-green-500", "bg-green-50");
 
-    <label>Phương thức thanh toán:</label>
-    <input type="radio" name="PaymentMethod" value="COD" checked /> COD
-    <input type="radio" name="PaymentMethod" value="MOMO" /> MoMo
+            storeInput.value = card.querySelector("input").value;
+        });
+    });
 
-    <br /><br />
+    // PAYMENT
+    paymentCards.forEach(card => {
+        card.addEventListener("click", () => {
 
-    <label>Ghi chú đơn hàng:</label>
-    <textarea name="OrderNote" rows="3" cols="50">@Model.OrderNote</textarea>
+            paymentCards.forEach(c => c.classList.remove("border-green-500", "bg-green-50"));
+            card.classList.add("border-green-500", "bg-green-50");
 
-    <br /><br />
-
-    <button type="submit">Đặt hàng</button>
-</form>
+            card.querySelector("input").checked = true;
+        });
+    });
+</script>

@@ -1,0 +1,41 @@
+@page "/admin-blazor/staff/edit/{id:int}"
+@using ITHealthy.Models
+@using Microsoft.AspNetCore.Components.Forms
+@layout AdminLayout
+
+@inject StaffService staffService
+@inject NavigationManager nav
+
+<h3>Sửa Staff</h3>
+
+@if (staff == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="staff" OnValidSubmit="Handle">
+        <InputText @bind-Value="staff.FullName" />
+        <InputText @bind-Value="staff.Email" />
+        <InputText @bind-Value="staff.Phone" />
+
+        <button type="submit">Update</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    Staff? staff;
+
+    protected override async Task OnInitializedAsync()
+    {
+        staff = await staffService.GetByIdAsync(id);
+    }
+
+    async Task Handle()
+    {
+        await staffService.UpdateAsync(staff);
+        nav.NavigateTo("/admin-blazor/staff");
+    }
+}

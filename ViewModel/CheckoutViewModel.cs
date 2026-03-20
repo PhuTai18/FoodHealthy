@@ -44,6 +44,8 @@ public class CheckoutItemViewModel
     public decimal? UnitPrice { get; set; }
     public decimal SubTotal { get; set; }
 
+    
+
 
 
 

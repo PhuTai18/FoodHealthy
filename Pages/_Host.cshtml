@@ -1,0 +1,18 @@
+@page "/admin-blazor"
+@namespace FoodHealthy.Pages
+@using CloudinaryDotNet
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="~/" />
+</head>
+<body>
+    <app>
+        <component type="typeof(FoodHealthy.Components.App)" render-mode="ServerPrerendered" />
+    </app>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

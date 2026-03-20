@@ -70,6 +70,12 @@ namespace ITHealthy.Controllers
             };
             model.TotalPrice = model.Items.Sum(i => i.SubTotal);
 
+            ViewBag.Stores = await _context.Stores
+                .Where(s => s.IsActive == true)
+                .OrderBy(s => s.City)
+                .ThenBy(s => s.District)
+                .ToListAsync();
+
             return View("~/Views/Client/Checkout/GetCheckoutByCustomer.cshtml", model);
         }
 
