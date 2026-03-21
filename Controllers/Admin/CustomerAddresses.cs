@@ -3,12 +3,12 @@ using ITHealthy.DTOs;
 using ITHealthy.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ITHealthy.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CustomerAddressesController : ControllerBase
+    [Route("addresses")]
+    public class CustomerAddressesController : Controller
     {
         private readonly ITHealthyDbContext _context;
 
@@ -17,9 +17,15 @@ namespace ITHealthy.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/customeraddresses/all
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("CustomerId");
+            return int.Parse(claim.Value);
+        }
+
+        // Lấy tất cả địa chỉ của tất cả khách hàng (dành cho admin)
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<CustomerAddressDTO>>> GetAllAddresses()
+        public async Task<IActionResult> GetAllAddresses()
         {
             var addresses = await _context.CustomerAddresses
                 .Include(a => a.Customer)
@@ -46,13 +52,13 @@ namespace ITHealthy.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(addresses);
+            return View(addresses);
         }
 
-        // 🔹 GET: api/customeraddresses/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerAddressDTO>> GetAddressById(int id)
+        // Lấy địa chỉ theo ID
+        public async Task<IActionResult> GetAddressById(int id)
         {
+
             var address = await _context.CustomerAddresses
                 .Include(a => a.Customer)
                 .Where(a => a.AddressId == id)
@@ -82,13 +88,15 @@ namespace ITHealthy.Controllers
             if (address == null)
                 return NotFound(new { message = "Không tìm thấy địa chỉ." });
 
-            return Ok(address);
+            return View(address);
         }
 
-        // 🔹 GET: api/customeraddresses/by-customer/{customerId}
-        [HttpGet("by-customer/{customerId}")]
-        public async Task<ActionResult<IEnumerable<CustomerAddressDTO>>> GetAddressesByCustomer(int customerId)
+        // Lấy địa chỉ theo ID khách hàng
+        public async Task<IActionResult> GetAddressesByCustomer()
         {
+
+            var customerId = GetCurrentUserId();
+
             var addresses = await _context.CustomerAddresses
                 .Where(a => a.CustomerId == customerId)
                 .Select(a => new CustomerAddressDTO
@@ -109,40 +117,53 @@ namespace ITHealthy.Controllers
                 .ToListAsync();
 
             if (!addresses.Any())
-                return NotFound(new { message = "Khách hàng này chưa có địa chỉ." });
+            {
+                TempData["error"] = "Bạn chưa có địa chỉ nào. Vui lòng thêm địa chỉ để tiếp tục.";
+                return RedirectToAction(nameof(GetAllAddresses));
+            }
 
-            return Ok(addresses);
+            return View(addresses);
         }
 
-        // 🔹 POST: api/customeraddresses/add
-        [HttpPost("add")]
-        public async Task<IActionResult> AddAddress([FromBody] CustomerAddressDTO request)
+        public IActionResult AddAddress()
         {
+            return View();
+        }
+
+        // Thêm địa chỉ mới
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAddress(CustomerAddressDTO request)
+        {
+            var customerId = GetCurrentUserId();
             if (string.IsNullOrEmpty(request.ReceiverName) || string.IsNullOrEmpty(request.PhoneNumber))
-                return BadRequest(new { message = "Tên người nhận và số điện thoại là bắt buộc." });
+            {
+                ModelState.AddModelError("", "Tên và SĐT là bắt buộc");
+                return View(request);
+            }
 
+            var parts = new List<string>
+            {
+                request.StreetAddress,
+                request.Ward,
+                request.District,
+                request.City,
+                request.Country
+            }.Where(p => !string.IsNullOrEmpty(p)).ToList();
 
+            string fullAddress = string.Join(", ", parts);
+            if (string.IsNullOrEmpty(fullAddress))
+            {
+                ModelState.AddModelError("", "Địa chỉ không hợp lệ.");
+                return View(request);
+            }
 
-var parts = new List<string>
-    {
-        request.StreetAddress,
-        request.Ward,
-        request.District,
-        request.City
-    }.Where(s => !string.IsNullOrEmpty(s));
-
-    string fullAddress = string.Join(", ", parts);
-    if (string.IsNullOrEmpty(fullAddress))
-        return BadRequest(new { message = "Địa chỉ không hợp lệ." });
-
-    // Tự động lấy tọa độ (miễn phí 100% - haochaun.io)YY
-    var coordinates = await GeocodingService.GetCoordinatesAsync(fullAddress);
-
-
+            // Tự động lấy tọa độ (miễn phí 100% - haochaun.io)YY
+            var coordinates = await GeocodingService.GetCoordinatesAsync(fullAddress);
 
             var address = new CustomerAddress
             {
-                CustomerId = request.CustomerId,
+                CustomerId = customerId,
                 ReceiverName = request.ReceiverName,
                 PhoneNumber = request.PhoneNumber,
                 StreetAddress = request.StreetAddress,
@@ -159,25 +180,52 @@ var parts = new List<string>
                 CreatedAt = DateTime.Now
             };
 
-
-
             _context.CustomerAddresses.Add(address);
             await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Thêm địa chỉ thành công!",
-                data = new { address }
-            });
+            TempData["success"] = "Đã thêm địa chỉ thành công.";
+            return RedirectToAction(nameof(GetAddressesByCustomer));
         }
 
-        // 🔹 PUT: api/customeraddresses/update/{id}
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateAddress(int id, [FromBody] CustomerAddressDTO request)
+
+        // Chinh sửa địa chỉ
+        public async Task<IActionResult> Edit(int id)
         {
             var address = await _context.CustomerAddresses.FindAsync(id);
             if (address == null)
-                return NotFound(new { message = "Không tìm thấy địa chỉ." });
+                return NotFound();
+
+            var dto = new CustomerAddressDTO
+            {
+                AddressId = address.AddressId,
+                ReceiverName = address.ReceiverName,
+                PhoneNumber = address.PhoneNumber,
+                StreetAddress = address.StreetAddress,
+                Ward = address.Ward,
+                District = address.District,
+                City = address.City,
+                Country = address.Country,
+                Postcode = address.Postcode,
+                Latitude = address.Latitude,
+                Longitude = address.Longitude,
+                GooglePlaceId = address.GooglePlaceId,
+                AddressType = address.AddressType,
+                IsDefault = address.IsDefault
+            };
+
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAddress(int id, CustomerAddressDTO request)
+        {
+
+            var address = await _context.CustomerAddresses.FindAsync(id);
+            if (address == null)
+            {
+                TempData["error"] = "Không tìm thấy địa chỉ.";
+                return RedirectToAction(nameof(GetAddressesByCustomer));
+            }
 
             address.ReceiverName = request.ReceiverName;
             address.PhoneNumber = request.PhoneNumber;
@@ -195,26 +243,35 @@ var parts = new List<string>
             address.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            TempData["success"] = "Cập nhật địa chỉ thành công.";
+            return RedirectToAction(nameof(GetAddressesByCustomer));
 
-            return Ok(new
-            {
-                message = "Cập nhật địa chỉ thành công!",
-                data = new { address.AddressId, address.ReceiverName }
-            });
         }
 
-        // 🔹 DELETE: api/customeraddresses/delete/{id}
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteAddress(int id)
+        // Xoa địa chỉ
+
+        public async Task<IActionResult> Delete(int id)
         {
             var address = await _context.CustomerAddresses.FindAsync(id);
             if (address == null)
-                return NotFound(new { message = "Không tìm thấy địa chỉ." });
+                return NotFound();
 
+            return View(address);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var address = await _context.CustomerAddresses.FindAsync(id);
+            if (address == null)
+                return NotFound();
             _context.CustomerAddresses.Remove(address);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Xóa địa chỉ thành công!" });
+            return RedirectToAction(nameof(GetAllAddresses));
         }
+
+
+
     }
 }

@@ -1,13 +1,25 @@
 @model ITHealthy.DTOs.LoginDTO
 
-
-<section class="flex min-h-screen bg-gray-50">
-@if (ViewBag.Message != null)
+@if (!ViewData.ModelState.IsValid)
 {
-    <div style="color: red; margin-bottom: 10px;">
-        @ViewBag.Message
+    <div class="mb-4 px-4 py-3 rounded-lg 
+        @(ViewBag.MessageType == "error"
+                     ? "bg-red-100 text-red-700 border border-red-400"
+                     : "bg-yellow-100 text-yellow-700 border border-yellow-400")">
+
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
     </div>
 }
+<section class="flex min-h-screen bg-gray-50">
+    @if (ViewBag.Message != null)
+    {
+        <div style="color: red; margin-bottom: 10px;">
+            @ViewBag.Message
+        </div>
+    }
     <!-- LEFT: Login Form -->
     <div class="flex flex-col justify-center w-full md:w-1/2 px-8 md:px-20 bg-white shadow-lg">
         <div class="max-w-md mx-auto w-full">

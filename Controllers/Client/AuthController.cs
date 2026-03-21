@@ -63,56 +63,109 @@ namespace ITHealthy.Controllers
         //     HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
         //     return RedirectToAction("", "Home");
         // }
-        [HttpPost]
-        public async Task<IActionResult> Login(LoginDTO dto)
-        {
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+    //     [HttpPost]
+    //     public async Task<IActionResult> Login(LoginDTO dto)
+    //     {
+    //         var customer = await _context.Customers
+    //             .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
-            if (customer == null)
-            {
-                ModelState.AddModelError("", "Email không tồn tại");
-                return View(dto);
-            }
+    //         if (customer == null)
+    //         {
+    //             ModelState.AddModelError("", "Email không tồn tại");
+    //             return View(dto);
+    //         }
 
-            if (!VerifyPassword(dto.Password, customer.PasswordHash))
-            {
-                ModelState.AddModelError("", "Mật khẩu không đúng");
-                return View(dto);
-            }
+    //         if (!VerifyPassword(dto.Password, customer.PasswordHash))
+    //         {
+    //             ModelState.AddModelError("", "Mật khẩu không đúng");
+    //             return View(dto);
+    //         }
 
-            if (customer.IsActive == false)
-            {
-                await SendOtpAsync(customer.CustomerId);
-                TempData["Email"] = customer.Email;
-                return RedirectToAction("VerifyOtp");
-            }
+    //         if (customer.IsActive == false)
+    //         {
+    //             await SendOtpAsync(customer.CustomerId);
+    //             TempData["Email"] = customer.Email;
+    //             return RedirectToAction("VerifyOtp");
+    //         }
 
-            // 🔥 1. TẠO CLAIMS
-            var claims = new List<Claim>
+    //         // 🔥 1. TẠO CLAIMS
+    //         var claims = new List<Claim>
+    // {
+    //     new Claim(ClaimTypes.Name, customer.Email),
+    //     new Claim("CustomerId", customer.CustomerId.ToString()),
+    //     new Claim(ClaimTypes.Role, customer.RoleUser ?? "User")
+    // };
+
+    //         var identity = new ClaimsIdentity(claims,
+    //             CookieAuthenticationDefaults.AuthenticationScheme);
+
+    //         var principal = new ClaimsPrincipal(identity);
+
+    //         // 🔥 2. LOGIN (COOKIE)
+    //         await HttpContext.SignInAsync(
+    //             CookieAuthenticationDefaults.AuthenticationScheme,
+    //             principal);
+
+    //         // 🔥 3. SESSION (GIỮ LẠI nếu bạn muốn)
+    //         HttpContext.Session.SetString("Email", customer.Email);
+    //         HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
+    //         HttpContext.Session.SetString("FullName", customer.FullName);
+
+    //         return RedirectToAction("Index", "Home");
+    //     }
+    [HttpPost]
+public async Task<IActionResult> Login(LoginDTO dto)
+{
+    var customer = await _context.Customers
+        .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+    // ❌ Tài khoản không tồn tại
+    if (customer == null)
+    {
+        ModelState.AddModelError("", "Tài khoản không tồn tại, vui lòng đăng ký để trải nghiệm mua sắm");
+        ViewBag.MessageType = "error";
+        return View(dto);
+    }
+
+    // ⚠️ Chưa kích hoạt → chuyển sang Register + thông báo
+    if (customer.IsActive == false)
+    {
+        TempData["Message"] = "Tài khoản chưa được kích hoạt, vui lòng đăng ký lại!";
+        TempData["MessageType"] = "warning";
+        return RedirectToAction("Register");
+    }
+
+    // ❌ Sai mật khẩu
+    if (!VerifyPassword(dto.Password, customer.PasswordHash))
+    {
+        ModelState.AddModelError("", "Mật khẩu không đúng!");
+        ViewBag.MessageType = "error";
+        return View(dto);
+    }
+
+    // 🔥 LOGIN
+    var claims = new List<Claim>
     {
         new Claim(ClaimTypes.Name, customer.Email),
         new Claim("CustomerId", customer.CustomerId.ToString()),
         new Claim(ClaimTypes.Role, customer.RoleUser ?? "User")
     };
 
-            var identity = new ClaimsIdentity(claims,
-                CookieAuthenticationDefaults.AuthenticationScheme);
+    var identity = new ClaimsIdentity(claims,
+        CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var principal = new ClaimsPrincipal(identity);
+    var principal = new ClaimsPrincipal(identity);
 
-            // 🔥 2. LOGIN (COOKIE)
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                principal);
+    await HttpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        principal);
 
-            // 🔥 3. SESSION (GIỮ LẠI nếu bạn muốn)
-            HttpContext.Session.SetString("Email", customer.Email);
-            HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
-            HttpContext.Session.SetString("FullName", customer.FullName);
+    HttpContext.Session.SetString("Email", customer.Email);
+    HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
+    HttpContext.Session.SetString("FullName", customer.FullName);
 
-            return RedirectToAction("Index", "Home");
-        }
+    return RedirectToAction("Index", "Home");
+}
 
 
 
